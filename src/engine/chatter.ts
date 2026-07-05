@@ -142,6 +142,40 @@ function distractorCall(ctx: ChatterContext, env: Env, rng: Rng): ChatterCall {
   };
 }
 
+export interface UnicomCall {
+  speaker: string;
+  text: string;
+  /** which pattern leg / action was reported — used by the scanner's listening quiz */
+  leg: string;
+}
+
+/** A self-announce call at an arbitrary non-towered airport (Scanner mode). */
+export function generateUnicomCall(
+  airport: { name: string; runways: string[] },
+  rng: Rng,
+): UnicomCall {
+  const other = randomTraffic(rng);
+  const rwy = pick(rng, airport.runways);
+  const options: { phrase: string; leg: string }[] = [
+    { phrase: `taxiing to runway ${rwy}`, leg: "taxi" },
+    { phrase: `departing runway ${rwy}, remaining in the pattern`, leg: "departing" },
+    { phrase: `departing runway ${rwy}, departing to the ${pick(rng, ["north", "south", "east", "west"])}`, leg: "departing" },
+    { phrase: `left crosswind runway ${rwy}`, leg: "crosswind" },
+    { phrase: `left downwind runway ${rwy}`, leg: "downwind" },
+    { phrase: `left base runway ${rwy}`, leg: "base" },
+    { phrase: `final runway ${rwy}, full stop`, leg: "final" },
+    { phrase: `final runway ${rwy}, touch and go`, leg: "final" },
+    { phrase: `one zero miles ${pick(rng, ["north", "south", "east", "west"])}, inbound for landing`, leg: "inbound" },
+    { phrase: `clear of runway ${rwy}, taxiing to the ramp`, leg: "clear of the runway" },
+  ];
+  const chosen = pick(rng, options);
+  return {
+    speaker: other.split(" ")[0],
+    text: `${airport.name} traffic, ${other}, ${chosen.phrase}, ${airport.name}.`,
+    leg: chosen.leg,
+  };
+}
+
 export const DISTRACTOR_PROBABILITY = 0.3;
 
 export function generateChatterCall(scenario: Scenario, env: Env, rng: Rng): ChatterCall {

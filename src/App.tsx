@@ -9,10 +9,11 @@ import Debrief from "./screens/Debrief";
 import Lesson from "./screens/Lesson";
 import Glossary from "./screens/Glossary";
 import Drill from "./screens/Drill";
+import Scanner from "./screens/Scanner";
 import { lessonForLevel, type LessonDeck } from "./content/lessons";
 import type { DrillSpec } from "./drills/drills";
 
-type Screen = "picker" | "briefing" | "radio" | "debrief" | "lesson" | "glossary" | "drill";
+type Screen = "picker" | "briefing" | "radio" | "debrief" | "lesson" | "glossary" | "drill" | "scanner";
 
 export interface DebriefData {
   scenario: Scenario;
@@ -101,6 +102,7 @@ export default function App() {
             onSettingsChange={updateSettings}
             onLearn={openLesson}
             onDrill={openDrill}
+            onScanner={() => setScreen("scanner")}
           />
         );
       case "drill":
@@ -120,6 +122,8 @@ export default function App() {
         ) : null;
       case "glossary":
         return <Glossary onBack={backToPicker} />;
+      case "scanner":
+        return <Scanner settings={settings} onBack={backToPicker} />;
       case "briefing":
         return scenario ? (
           <Briefing scenario={scenario} settings={settings} onStart={startScenario} onBack={backToPicker} />

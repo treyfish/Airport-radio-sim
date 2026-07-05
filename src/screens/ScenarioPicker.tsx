@@ -10,11 +10,12 @@ interface Props {
   onSettingsChange(settings: Settings): void;
   onLearn(level: number): void;
   onDrill(spec: DrillSpec): void;
+  onScanner(): void;
 }
 
 const scenarioLevels = new Map(scenarios.map((s) => [s.id, s.level as number]));
 
-export default function ScenarioPicker({ persisted, onPick, onSettingsChange, onLearn, onDrill }: Props) {
+export default function ScenarioPicker({ persisted, onPick, onSettingsChange, onLearn, onDrill, onScanner }: Props) {
   const { settings, progress } = persisted;
   const [callsignDraft, setCallsignDraft] = useState(settings.callsign);
 
@@ -63,6 +64,19 @@ export default function ScenarioPicker({ persisted, onPick, onSettingsChange, on
             />
             Background traffic on frequency
           </label>
+        </div>
+      </section>
+
+      <section className="level-section">
+        <h2>📡 Scanner</h2>
+        <div className="scenario-grid">
+          <button className="scenario-card card" onClick={onScanner}>
+            <span className="scenario-title">📡 Florida UNICOM scanner</span>
+            <span className="scenario-airport">
+              Tune a Florida CTAF and just listen — simulated party-line traffic, plus links to the
+              real thing on LiveATC.
+            </span>
+          </button>
         </div>
       </section>
 

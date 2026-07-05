@@ -272,6 +272,23 @@ input:focus { outline: 2px solid var(--accent-dim); }
 .primary-btn.secondary { background: var(--bg-raised); color: var(--text); border: 2px solid var(--border); }
 .disc-feedback { margin: 0; color: var(--text-dim); }
 
+/* ---- scanner ---- */
+.scanner { display: flex; flex-direction: column; gap: 12px; }
+.scanner-controls { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.scanner-controls select {
+  flex: 1; min-width: 260px;
+  background: var(--bg-inset); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px 12px; font-size: 0.95rem;
+}
+.scanner-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.primary-btn.danger { background: var(--danger); color: #fff; }
+.quiz-toggle { display: flex; align-items: center; gap: 7px; font-size: 0.9rem; cursor: pointer; }
+.quiz-score { color: var(--accent); font-weight: 600; margin: 0; }
+.quiz-options { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.quiz-btn { padding: 7px 12px; font-size: 0.85rem; font-weight: 500; }
+.disclaimer { color: var(--text-dim); font-size: 0.78rem; }
+
 /* ---- glossary ---- */
 .glossary { display: flex; flex-direction: column; gap: 12px; }
 .glossary-list { display: flex; flex-direction: column; gap: 10px; }
