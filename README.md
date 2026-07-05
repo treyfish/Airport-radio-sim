@@ -15,12 +15,31 @@ Difficulty ramps up with traffic complexity:
 | Level | Airspace | You practice |
 |---|---|---|
 | 1 | Non-towered field (CTAF) | Self-announcing: taxi, departure, pattern legs, inbound, clear-of-runway |
-| 2 | Class D tower | ATIS, ground/tower calls, taxi + takeoff/landing clearance readbacks, hold short |
-| 3 | Flight following | Brief call-up, full request, squawk readbacks, radar handoffs, check-ins |
-| 4 | Class C | Clearance delivery, multi-element clearance readbacks, line up and wait, departure check-in |
+| 2 | Class D tower | ATIS, ground/tower calls, readbacks, hold short, go-arounds, sequencing behind traffic, and the "student pilot toolkit" (radio check / say again slower) |
+| 3 | Flight following | Brief call-up, full request, squawk readbacks, radar handoffs — plus declaring a MAYDAY |
+| 4 | Class C / B | Clearance delivery, multi-element readbacks, line up and wait, and the Class Bravo transition ("cleared through the Bravo" or you stay out) |
 
 Pass any scenario in a level (70%+) to unlock the next — or use the
 "practice anyway" escape hatch.
+
+## Beyond the scenarios
+
+- **📖 Learn mode** — short per-level lessons on the *why* (readback rules,
+  LUAW vs cleared-for-takeoff, CRAFT, the Bravo magic words) plus a searchable
+  plain-language **glossary** of ~40 radio terms.
+- **🎧 Listening drills** — copy the ATIS, copy a Class C clearance
+  (heading/altitude/frequency/squawk), and "whose call is it?" — callsign
+  discrimination against tail numbers one character off yours.
+- **📻 Background traffic** — other aircraft use the frequency while you
+  practice, including *distractor* calls addressed to similar callsigns.
+  Answer someone else's clearance and the coach catches it; repeat offenses
+  show up in a "Frequency discipline" section of your debrief.
+- **⏱ Pace & delay coaching** — advisory notes when you hesitate too long
+  before keying up or talk much faster/slower than the ~150 wpm controllers
+  copy best (never affects your score).
+- **📡 Florida UNICOM scanner** — tune any of 25 Florida GA fields and just
+  listen to simulated party-line traffic (with an optional "which leg did
+  they report?" quiz), plus one-click links to the real feeds on LiveATC.
 
 ## Running it
 
