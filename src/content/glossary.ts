@@ -1,0 +1,51 @@
+// Plain-language glossary of radio and airspace terms used in the app.
+
+export interface GlossaryEntry {
+  term: string;
+  definition: string;
+}
+
+export const GLOSSARY: GlossaryEntry[] = [
+  { term: "ATIS", definition: "Automatic Terminal Information Service — a recorded loop of weather and airport info at towered fields, updated about hourly. Each version gets a phonetic letter (\"information Bravo\"). Tell the controller you have it on first contact." },
+  { term: "CTAF", definition: "Common Traffic Advisory Frequency — the shared frequency at a non-towered airport where pilots self-announce their position and intentions. Nobody answers; you're painting a picture for other pilots." },
+  { term: "UNICOM", definition: "A non-government radio station on an airport, usually the FBO desk. Can answer questions about fuel or parking. Often the same frequency as CTAF, but it is not air traffic control." },
+  { term: "Readback", definition: "Repeating the key parts of a controller's instruction back to them, ending with your callsign. It's how mis-heard instructions get caught. Runway assignments, hold-short instructions, and clearances always require one." },
+  { term: "Hold short", definition: "An instruction to stop before a runway and stay off it. Must be read back word for word — \"Roger\" is never an acceptable response to a hold-short instruction." },
+  { term: "Line up and wait (LUAW)", definition: "Taxi onto the runway, stop, and wait — it is NOT a clearance to take off. The takeoff clearance comes separately." },
+  { term: "Cleared for the option", definition: "A clearance that lets you choose: touch-and-go, stop-and-go, low approach, or full-stop landing. Common during pattern training." },
+  { term: "Squawk", definition: "The four-digit transponder code a radar controller assigns you (\"squawk 4064\"). Digits run 0–7 only. Read it back, then dial it in." },
+  { term: "Squawk VFR", definition: "Set your transponder to 1200, the generic VFR code — usually said when radar services end." },
+  { term: "Mode C", definition: "The part of your transponder that reports altitude. Controllers verify it against your stated altitude, which is why you report altitude on every radar check-in." },
+  { term: "Altimeter setting", definition: "The barometric pressure value (like 29.92) you dial into your altimeter so it reads correct altitude. Controllers give it to you; reading it back confirms you'll fly the right altitude." },
+  { term: "Flight following", definition: "Optional VFR radar service: a controller watches your flight and calls out traffic. Free, and one of the best safety habits — but you remain responsible for seeing and avoiding." },
+  { term: "Radar contact", definition: "The controller has identified your blip on their scope. It does NOT mean you're cleared into any airspace — it just means they see you." },
+  { term: "Handoff", definition: "Being passed from one radar sector to the next: \"contact Big Sky Approach on 124.7\". Read back the frequency, switch, and check in with callsign and altitude." },
+  { term: "Pattern legs", definition: "The rectangle flown around a runway: upwind (climbing out), crosswind (first 90° turn), downwind (parallel, opposite the landing direction), base (turning toward the runway), final (lined up to land)." },
+  { term: "The 45", definition: "The recommended way to join a traffic pattern: approach the downwind leg at a 45° angle, at pattern altitude, so you can see and be seen." },
+  { term: "Full stop", definition: "Landing intention meaning you'll land and exit the runway — as opposed to a touch-and-go. Announcing it helps traffic behind you plan spacing." },
+  { term: "Touch-and-go", definition: "Landing and immediately taking off again without stopping — standard pattern practice. \"Stop-and-go\" means a full stop on the runway followed by a takeoff." },
+  { term: "Go around", definition: "Abandoning a landing approach: full power, climb away, rejoin the pattern. Can be your decision or a tower instruction — either way, announce or acknowledge it." },
+  { term: "Ground control", definition: "The tower-cab controller who owns the taxiways. You talk to Ground from the ramp to the runway hold-short line, then switch to Tower." },
+  { term: "Clearance delivery", definition: "At busier airports, the frequency you call first — before Ground — to receive your departure instructions (heading, altitude, departure frequency, squawk)." },
+  { term: "CRAFT", definition: "The order clearances are delivered in, and the way to copy them: Clearance limit, Route, Altitude, Frequency, Transponder. Pen first, then key the mic." },
+  { term: "Class D airspace", definition: "The airspace around a small towered airport. You need two-way radio contact with the tower before entering — meaning they've said your callsign back to you." },
+  { term: "Class C airspace", definition: "Airspace around mid-size airports with radar service. Requires two-way contact plus a transponder; VFR departures get their instructions from Clearance Delivery." },
+  { term: "Class B airspace", definition: "The airspace around the biggest airports. You may not enter until you hear the literal words \"cleared into the Class Bravo airspace\" — two-way contact alone is NOT enough." },
+  { term: "Niner / tree / fife", definition: "Aviation pronunciation of 9, 3, and 5, chosen so they can't be confused with each other or with foreign words over a scratchy radio." },
+  { term: "Phonetic alphabet", definition: "Alpha, Bravo, Charlie… Zulu — one word per letter, so spelling survives static. Every pilot should be able to rattle it off without thinking." },
+  { term: "Callsign", definition: "Your aircraft's radio identity — the tail number (N123AB, spoken \"November one two tree alpha bravo\") or type + tail (\"Skyhawk one two tree alpha bravo\"). After the controller abbreviates it, you may too (\"Skyhawk tree alpha bravo\")." },
+  { term: "Say again", definition: "The standard way to ask for a repeat. Add specifics if you caught part of it: \"say again the departure frequency\". Infinitely better than guessing on a readback." },
+  { term: "Unable", definition: "The standard word for \"I can't comply with that instruction.\" Say it, say why, and offer what you can do. Controllers respect it." },
+  { term: "Wilco", definition: "\"Will comply\" — I heard the instruction and will do it. Stronger than \"roger\", but clearance-type instructions still need a full readback." },
+  { term: "Roger", definition: "\"I heard your transmission\" — nothing more. It does not mean yes, and it never substitutes for a required readback." },
+  { term: "Student pilot", definition: "Say these two words on first contact and controllers will slow down and simplify. It's an official AIM recommendation, not an admission of weakness." },
+  { term: "MAYDAY", definition: "The international distress call for an emergency threatening life or the aircraft — spoken three times, then who/where/what. ATC drops everything to help. (PAN-PAN is the step below: urgent, not yet dire.)" },
+  { term: "Souls on board", definition: "Emergency-speak for the total number of people on the aircraft — ATC asks so rescuers know how many to account for, along with fuel remaining in hours." },
+  { term: "Frequency change approved", definition: "The controller is releasing you to switch frequencies. Acknowledge with your callsign, then flip." },
+  { term: "Radar services terminated", definition: "Flight following is over — usually near your destination. Squawk VFR (1200) and continue on your own." },
+  { term: "Position and hold", definition: "Old US phraseology for what is now \"line up and wait\" — you may still hear old-timers use it. Same meaning: enter the runway and wait." },
+  { term: "Progressive taxi", definition: "Turn-by-turn taxi directions from Ground — ask for it when you don't know the airport layout. Far better than getting lost on a taxiway." },
+  { term: "Radio check", definition: "\"Cedar Valley Unicom, Skyhawk 3AB, radio check\" — asking anyone listening to confirm your radio works and how clearly (\"loud and clear\", \"readable\"). A normal call, especially after maintenance." },
+  { term: "METAR", definition: "The hourly coded weather observation for an airport — wind, visibility, clouds, temperature, altimeter. ATIS broadcasts are built from it." },
+  { term: "FBO", definition: "Fixed-Base Operator — the business on the field that sells fuel and services. Usually the voice behind UNICOM at small airports." },
+];

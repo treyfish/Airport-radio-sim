@@ -238,6 +238,25 @@ input:focus { outline: 2px solid var(--accent-dim); }
 
 .model-call { background: var(--bg-inset); border-radius: var(--radius); padding: 9px 13px; font-size: 0.92rem; color: var(--accent); }
 
+/* ---- lesson ---- */
+.lesson { display: flex; flex-direction: column; gap: 10px; }
+.lesson-deck-title { color: var(--text-dim); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+.lesson-progress { display: flex; gap: 6px; }
+.lesson-progress .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); }
+.lesson-progress .dot.filled { background: var(--accent); }
+.lesson-body p { margin: 8px 0; }
+.lesson-body ul { margin: 8px 0; padding-left: 22px; }
+.lesson-body li { margin: 4px 0; }
+.lesson-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.header-link { margin-left: auto; }
+.learn-btn { font-size: 0.8rem; }
+
+/* ---- glossary ---- */
+.glossary { display: flex; flex-direction: column; gap: 12px; }
+.glossary-list { display: flex; flex-direction: column; gap: 10px; }
+.glossary-entry h3 { color: var(--accent); margin-bottom: 4px; }
+.glossary-entry p { margin: 0; font-size: 0.93rem; }
+
 /* ---- mobile ---- */
 @media (max-width: 560px) {
   .briefing-grid { grid-template-columns: 1fr; }

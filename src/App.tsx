@@ -6,8 +6,11 @@ import ScenarioPicker from "./screens/ScenarioPicker";
 import Briefing from "./screens/Briefing";
 import Radio from "./screens/Radio";
 import Debrief from "./screens/Debrief";
+import Lesson from "./screens/Lesson";
+import Glossary from "./screens/Glossary";
+import { lessonForLevel, type LessonDeck } from "./content/lessons";
 
-type Screen = "picker" | "briefing" | "radio" | "debrief";
+type Screen = "picker" | "briefing" | "radio" | "debrief" | "lesson" | "glossary";
 
 export interface DebriefData {
   scenario: Scenario;
@@ -21,6 +24,7 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>("picker");
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [debrief, setDebrief] = useState<DebriefData | null>(null);
+  const [lessonDeck, setLessonDeck] = useState<LessonDeck | null>(null);
   const engineRef = useRef<ScenarioEngine | null>(null);
 
   const settings = persisted.settings;
@@ -54,7 +58,22 @@ export default function App() {
     engineRef.current = null;
     setScenario(null);
     setDebrief(null);
+    setLessonDeck(null);
     setScreen("picker");
+  };
+
+  const openLesson = (level: number) => {
+    const deck = lessonForLevel(level);
+    if (!deck) return;
+    setLessonDeck(deck);
+    setScreen("lesson");
+  };
+
+  const finishLesson = () => {
+    if (lessonDeck) {
+      setPersisted(recordResult(`lesson:${lessonDeck.level}`, 100, true));
+    }
+    backToPicker();
   };
 
   const retryScenario = () => {
@@ -70,8 +89,15 @@ export default function App() {
             persisted={persisted}
             onPick={pickScenario}
             onSettingsChange={updateSettings}
+            onLearn={openLesson}
           />
         );
+      case "lesson":
+        return lessonDeck ? (
+          <Lesson deck={lessonDeck} onDone={finishLesson} onBack={backToPicker} />
+        ) : null;
+      case "glossary":
+        return <Glossary onBack={backToPicker} />;
       case "briefing":
         return scenario ? (
           <Briefing scenario={scenario} settings={settings} onStart={startScenario} onBack={backToPicker} />
@@ -93,6 +119,9 @@ export default function App() {
       <header className="app-header">
         <h1 onClick={backToPicker}>✈️ Airport Radio Sim</h1>
         <span className="tagline">Sound like a pro on frequency</span>
+        <button className="link-btn header-link" onClick={() => setScreen("glossary")}>
+          Glossary
+        </button>
       </header>
       {body}
     </div>

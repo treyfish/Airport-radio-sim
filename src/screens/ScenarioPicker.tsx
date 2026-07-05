@@ -7,11 +7,12 @@ interface Props {
   persisted: PersistedState;
   onPick(scenario: Scenario): void;
   onSettingsChange(settings: Settings): void;
+  onLearn(level: number): void;
 }
 
 const scenarioLevels = new Map(scenarios.map((s) => [s.id, s.level as number]));
 
-export default function ScenarioPicker({ persisted, onPick, onSettingsChange }: Props) {
+export default function ScenarioPicker({ persisted, onPick, onSettingsChange, onLearn }: Props) {
   const { settings, progress } = persisted;
   const [callsignDraft, setCallsignDraft] = useState(settings.callsign);
 
@@ -61,6 +62,9 @@ export default function ScenarioPicker({ persisted, onPick, onSettingsChange }: 
           <section key={level} className="level-section">
             <h2>
               {LEVEL_TITLES[level] ?? `Level ${level}`}
+              <button className="link-btn learn-btn" onClick={() => onLearn(level)}>
+                📖 Learn{progress[`lesson:${level}`] ? " ✓" : ""}
+              </button>
               {!unlocked && <span className="locked-tag">locked — pass a Level {level - 1} scenario</span>}
             </h2>
             <div className="scenario-grid">
