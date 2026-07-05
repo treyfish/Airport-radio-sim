@@ -1,0 +1,311 @@
+{
+  "id": "flight-following",
+  "level": 3,
+  "title": "Picking up VFR flight following",
+  "briefing": {
+    "airport": "En route: Cedar Valley → Centerville",
+    "description": "You departed Cedar Valley VFR and want radar advisories for the trip to Centerville. You'll make a brief initial call-up to Approach, pass your full details when they say “go ahead”, read back your squawk, and handle a radar handoff to the next sector. Rule of thumb with radar controllers: keep the first call short — just who you're calling and who you are.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "frequencies": [
+      { "name": "Big Sky Approach", "mhz": "126.4" },
+      { "name": "Big Sky Approach (east)", "mhz": "124.7" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "cruise",
+      "type": "event",
+      "text": "Level at 3,500 feet, 10 miles east of Cedar Valley. You tune Big Sky Approach on 126.4 and listen — the frequency is quiet.",
+      "next": "callup"
+    },
+    {
+      "id": "callup",
+      "type": "studentCall",
+      "prompt": "Make your initial call-up. Keep it short — just who you're calling and who you are. Details come after they answer.",
+      "hint": "Big Sky Approach, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Big Sky Approach",
+            "extractor": "facility",
+            "expected": "big sky approach",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Big Sky Approach”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your full callsign — that's the whole point of the call-up."
+          }
+        ]
+      },
+      "next": "goahead"
+    },
+    {
+      "id": "goahead",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, Big Sky Approach, go ahead.",
+      "next": "request"
+    },
+    {
+      "id": "request",
+      "type": "studentCall",
+      "prompt": "Now pass your details: aircraft type, position, altitude, and your request (flight following to Centerville at 5,500).",
+      "hint": "Skyhawk {callsign} is a Cessna 172, one zero miles east of Cedar Valley at three thousand five hundred, request flight following to Centerville at five thousand five hundred.",
+      "call": {
+        "elements": [
+          {
+            "id": "type",
+            "label": "aircraft type",
+            "extractor": "intent",
+            "expected": "cessna 172",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Give your aircraft type — radar needs it for your data block (“Cessna 172” or “Skyhawk”)."
+          },
+          {
+            "id": "position",
+            "label": "position report",
+            "extractor": "intent",
+            "expected": "10 miles east of cedar valley",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Give your position relative to a known point: “one zero miles east of Cedar Valley”."
+          },
+          {
+            "id": "altitude",
+            "label": "current altitude",
+            "extractor": "altitude",
+            "expected": "three thousand five hundred",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "State your current altitude — the controller must verify it against your Mode C.",
+            "feedbackWrong": "You said {heard} feet, but you're level at 3,500."
+          },
+          {
+            "id": "request",
+            "label": "the request",
+            "extractor": "intent",
+            "expected": "request flight following to centerville",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Say what you want: “request flight following to Centerville”."
+          }
+        ]
+      },
+      "next": "squawk_assign"
+    },
+    {
+      "id": "squawk_assign",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, squawk {squawk}.",
+      "setsVariables": { "squawk": "{gen:squawk}" },
+      "next": "squawk_readback"
+    },
+    {
+      "id": "squawk_readback",
+      "type": "studentCall",
+      "prompt": "Read back the squawk code.",
+      "hint": "Squawk {squawk}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "squawk",
+            "label": "squawk code readback",
+            "extractor": "squawk",
+            "expected": "{squawk}",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "You forgot to read back the squawk code — say the four digits back so the controller can catch a mis-set transponder.",
+            "feedbackWrong": "You read back {heard}, but Approach assigned {squawk}."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "radar_contact"
+    },
+    {
+      "id": "radar_contact",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, radar contact one two miles east of Cedar Valley at three thousand five hundred. Centerville altimeter {altimeter}.",
+      "next": "altimeter_ack"
+    },
+    {
+      "id": "altimeter_ack",
+      "type": "studentCall",
+      "prompt": "Acknowledge with the altimeter setting and your callsign.",
+      "hint": "Altimeter {altimeter}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "altimeter",
+            "label": "altimeter acknowledgment",
+            "extractor": "phrase",
+            "expected": "{altimeter}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the altimeter setting — it confirms you'll be flying the correct altitude."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign in the acknowledgment."
+          }
+        ]
+      },
+      "next": "cruise2"
+    },
+    {
+      "id": "cruise2",
+      "type": "event",
+      "text": "You climb to 5,500 and cruise. Twenty miles later, Approach calls with a handoff.",
+      "next": "handoff"
+    },
+    {
+      "id": "handoff",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, contact Big Sky Approach on one two four point seven.",
+      "next": "handoff_readback"
+    },
+    {
+      "id": "handoff_readback",
+      "type": "studentCall",
+      "prompt": "Read back the new frequency.",
+      "hint": "One two four point seven, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "frequency",
+            "label": "frequency readback",
+            "extractor": "frequency",
+            "expected": "124.7",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Read back the frequency — a mis-heard digit means calling the wrong sector.",
+            "feedbackWrong": "You read back {heard}, but the new frequency is 124.7."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "switch"
+    },
+    {
+      "id": "switch",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Big Sky Approach, east sector — frequency is quiet.",
+      "setsFrequency": "124.7",
+      "next": "checkin"
+    },
+    {
+      "id": "checkin",
+      "type": "studentCall",
+      "prompt": "Check in on the new frequency with your callsign and altitude.",
+      "hint": "Big Sky Approach, Skyhawk {callsign}, level five thousand five hundred.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing the new sector",
+            "extractor": "facility",
+            "expected": "big sky approach",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility on check-in: “Big Sky Approach”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "altitude",
+            "label": "your altitude",
+            "extractor": "altitude",
+            "expected": "five thousand five hundred",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "State your altitude on check-in — the new controller must verify your Mode C.",
+            "feedbackWrong": "You said {heard} feet, but you're level at 5,500."
+          }
+        ]
+      },
+      "next": "terminated"
+    },
+    {
+      "id": "terminated",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, radar contact. Centerville is one five miles ahead — radar services terminated, squawk VFR, frequency change approved.",
+      "next": "term_readback"
+    },
+    {
+      "id": "term_readback",
+      "type": "studentCall",
+      "prompt": "Acknowledge the termination.",
+      "hint": "Squawk VFR, frequency change approved, Skyhawk {callsign}. Thanks for the help.",
+      "call": {
+        "elements": [
+          {
+            "id": "squawk_vfr",
+            "label": "squawk VFR acknowledgment",
+            "extractor": "phrase",
+            "expected": "squawk vfr",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Acknowledge “squawk VFR” — you're confirming you'll reset to 1200."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End with your callsign."
+          }
+        ]
+      },
+      "next": null
+    }
+  ]
+}

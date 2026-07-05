@@ -1,0 +1,426 @@
+{
+  "id": "ctaf-pattern",
+  "level": 1,
+  "title": "Pattern work at a non-towered field",
+  "briefing": {
+    "airport": "Cedar Valley Muni (KCVY) — non-towered",
+    "description": "A calm morning at Cedar Valley, a quiet non-towered field. You'll fly one lap in the traffic pattern: taxi out, depart, fly the pattern, land, and taxi back — self-announcing every leg on CTAF. Winds favor runway {rwy}. Remember the CTAF formula: who you're talking to, who you are, where you are / what you're doing, and the airport name again at the end.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "frequencies": [{ "name": "CTAF", "mhz": "122.8" }]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["18", "36"] }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "taxi_call",
+      "type": "studentCall",
+      "prompt": "You're at the ramp, engine running, ready to taxi to runway {rwy}. Announce your taxi on CTAF.",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, taxiing from the ramp to runway {rwy}, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Start with who you're addressing: “Cedar Valley traffic” tells everyone on the shared frequency which airport this is about."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You never said who you are — include your callsign, e.g. “Skyhawk {callsign}”."
+          },
+          {
+            "id": "intent",
+            "label": "taxi intention",
+            "extractor": "intent",
+            "expected": "taxiing to runway",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Say what you're doing: “taxiing to runway {rwy}”."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Name the runway you're taxiing to so pattern traffic knows which end to watch.",
+            "feedbackWrong": "You said runway {heard}, but you're taxiing to runway {rwy}."
+          },
+          {
+            "id": "closing",
+            "label": "closing with the airport name",
+            "extractor": "phrase",
+            "expected": "cedar valley",
+            "required": false,
+            "weight": 1,
+            "feedbackMissing": "Pros close CTAF calls by repeating the airport name — pilots tuning in mid-call still learn where you are."
+          }
+        ]
+      },
+      "next": "runup_done"
+    },
+    {
+      "id": "runup_done",
+      "type": "event",
+      "text": "Run-up complete. You're holding short of runway {rwy}, and final is clear.",
+      "next": "departure_call"
+    },
+    {
+      "id": "departure_call",
+      "type": "studentCall",
+      "prompt": "Announce your departure before taking the runway. You're staying in the pattern.",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, departing runway {rwy}, remaining in the pattern, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Start with “Cedar Valley traffic” so everyone knows which airport you're departing."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign so traffic can track who's where."
+          },
+          {
+            "id": "departing",
+            "label": "departure announcement",
+            "extractor": "intent",
+            "expected": "departing runway",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Say you're “departing runway {rwy}” — that's the key information for anyone on final."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Name the departure runway.",
+            "feedbackWrong": "You said runway {heard}, but you're departing runway {rwy}."
+          },
+          {
+            "id": "pattern_intent",
+            "label": "staying in the pattern",
+            "extractor": "intent",
+            "expected": "remaining in the pattern",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Say your intentions after departure — “remaining in the pattern” tells others you'll be right back on downwind."
+          },
+          {
+            "id": "closing",
+            "label": "closing with the airport name",
+            "extractor": "phrase",
+            "expected": "cedar valley",
+            "required": false,
+            "weight": 1,
+            "feedbackMissing": "Close with the airport name: “…Cedar Valley.”"
+          }
+        ]
+      },
+      "next": "airborne"
+    },
+    {
+      "id": "airborne",
+      "type": "event",
+      "text": "You lift off and climb upwind. Passing 700 feet AGL, you start your crosswind turn.",
+      "next": "crosswind_call"
+    },
+    {
+      "id": "crosswind_call",
+      "type": "studentCall",
+      "prompt": "Announce your crosswind turn.",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, left crosswind runway {rwy}, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Lead with “Cedar Valley traffic”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "position report (crosswind)",
+            "extractor": "phrase",
+            "expected": "crosswind",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report the pattern leg you're on: “left crosswind runway {rwy}”."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Include the runway in position calls — “crosswind runway {rwy}”.",
+            "feedbackWrong": "You said runway {heard}, but the pattern is for runway {rwy}."
+          }
+        ]
+      },
+      "next": "downwind_event"
+    },
+    {
+      "id": "downwind_event",
+      "type": "event",
+      "text": "You level off at pattern altitude and turn downwind, running your before-landing checks.",
+      "next": "downwind_call"
+    },
+    {
+      "id": "downwind_call",
+      "type": "studentCall",
+      "prompt": "Announce your downwind leg.",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, left downwind runway {rwy}, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Lead with “Cedar Valley traffic”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "position report (downwind)",
+            "extractor": "phrase",
+            "expected": "downwind",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report your pattern leg: “left downwind runway {rwy}”."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Include the runway in position calls.",
+            "feedbackWrong": "You said runway {heard}, but the pattern is for runway {rwy}."
+          }
+        ]
+      },
+      "next": "base_event"
+    },
+    {
+      "id": "base_event",
+      "type": "event",
+      "text": "Abeam the numbers, power back, flaps set. You turn base.",
+      "next": "base_call"
+    },
+    {
+      "id": "base_call",
+      "type": "studentCall",
+      "prompt": "Announce your base turn.",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, left base runway {rwy}, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Lead with “Cedar Valley traffic”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "position report (base)",
+            "extractor": "phrase",
+            "expected": "base",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report your pattern leg: “left base runway {rwy}”."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Include the runway in position calls.",
+            "feedbackWrong": "You said runway {heard}, but the pattern is for runway {rwy}."
+          }
+        ]
+      },
+      "next": "final_event"
+    },
+    {
+      "id": "final_event",
+      "type": "event",
+      "text": "You roll out on final, lined up with runway {rwy}. This will be a full stop.",
+      "next": "final_call"
+    },
+    {
+      "id": "final_call",
+      "type": "studentCall",
+      "prompt": "Announce final, and include your intentions (full stop).",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, final runway {rwy}, full stop, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Lead with “Cedar Valley traffic”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "position report (final)",
+            "extractor": "phrase",
+            "expected": "final",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report that you're on final — anyone holding short needs to hear it."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Include the runway.",
+            "feedbackWrong": "You said runway {heard}, but you're landing on runway {rwy}."
+          },
+          {
+            "id": "intentions",
+            "label": "landing intentions",
+            "extractor": "intent",
+            "expected": "full stop",
+            "required": false,
+            "weight": 1,
+            "feedbackMissing": "Saying “full stop” (vs “touch and go”) helps traffic plan their spacing behind you."
+          }
+        ]
+      },
+      "next": "landed"
+    },
+    {
+      "id": "landed",
+      "type": "event",
+      "text": "Nice landing. You slow down and exit onto the taxiway, clear of runway {rwy}.",
+      "next": "clear_call"
+    },
+    {
+      "id": "clear_call",
+      "type": "studentCall",
+      "prompt": "Let everyone know you're clear of the runway.",
+      "hint": "Cedar Valley traffic, Skyhawk {callsign}, clear of runway {rwy}, taxiing to the ramp, Cedar Valley.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing “Cedar Valley traffic”",
+            "extractor": "facility",
+            "expected": "cedar valley traffic",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Lead with “Cedar Valley traffic”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "clear",
+            "label": "clear-of-runway report",
+            "extractor": "intent",
+            "expected": "clear of runway",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Announce “clear of runway {rwy}” — the aircraft on final is waiting to hear exactly this."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Include the runway you just cleared.",
+            "feedbackWrong": "You said runway {heard}, but you landed on runway {rwy}."
+          }
+        ]
+      },
+      "next": null
+    }
+  ]
+}

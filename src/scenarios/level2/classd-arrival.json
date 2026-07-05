@@ -1,0 +1,285 @@
+{
+  "id": "classd-arrival",
+  "level": 2,
+  "title": "Class D arrival: tower sequencing",
+  "briefing": {
+    "airport": "Centerville Rgnl (KCVL) — Class D",
+    "description": "You're inbound to Centerville from the practice area. Pick up the ATIS before you call, make your initial call to Tower with position, ATIS, and intentions, then fly the pattern entry they give you — reading back every instruction with your callsign.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "atisText": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Few clouds at five thousand. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+    "frequencies": [
+      { "name": "ATIS", "mhz": "124.2" },
+      { "name": "Tower", "mhz": "118.3" },
+      { "name": "Ground", "mhz": "121.7" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["13", "31"] },
+    { "name": "atis", "kind": "choice", "choices": ["echo", "foxtrot", "golf", "hotel"] },
+    { "name": "wind_dir", "kind": "choice", "choices": ["120", "130", "140", "300", "310"] },
+    { "name": "wind_kt", "kind": "choice", "choices": ["7", "9", "11"] },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } },
+    { "name": "direction", "kind": "choice", "choices": ["north", "south", "west"] }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "atis",
+      "type": "atcSay",
+      "speaker": "ATIS",
+      "text": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Few clouds at five thousand. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+      "next": "tune_tower"
+    },
+    {
+      "id": "tune_tower",
+      "type": "event",
+      "text": "ATIS copied. You're 10 miles {direction} of the field. You switch to Tower, 118.3.",
+      "next": "initial_call"
+    },
+    {
+      "id": "initial_call",
+      "type": "studentCall",
+      "prompt": "Make your initial call to Tower: who you are, where you are, ATIS, and what you want (full stop).",
+      "hint": "Centerville Tower, Skyhawk {callsign}, one zero miles {direction} with information {atis}, inbound full stop.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Centerville Tower",
+            "extractor": "facility",
+            "expected": "centerville tower",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Centerville Tower”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your full callsign on initial contact."
+          },
+          {
+            "id": "position",
+            "label": "distance and direction",
+            "extractor": "intent",
+            "expected": "10 miles {direction}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Give your position: “one zero miles {direction}”. Tower can't sequence you without it."
+          },
+          {
+            "id": "atis",
+            "label": "the ATIS code",
+            "extractor": "atis",
+            "expected": "{atis}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report the ATIS: “with information {atis}”.",
+            "feedbackWrong": "You said information {heard}, but the current ATIS is {atis}."
+          },
+          {
+            "id": "intent",
+            "label": "your intentions",
+            "extractor": "intent",
+            "expected": "inbound full stop",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "State your intentions: “inbound full stop”."
+          }
+        ]
+      },
+      "next": "tower_entry"
+    },
+    {
+      "id": "tower_entry",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, Centerville Tower, enter left downwind runway {rwy}, report midfield.",
+      "next": "entry_readback"
+    },
+    {
+      "id": "entry_readback",
+      "type": "studentCall",
+      "prompt": "Read back the pattern entry and the report point.",
+      "hint": "Enter left downwind runway {rwy}, will report midfield, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "entry",
+            "label": "pattern entry readback",
+            "extractor": "phrase",
+            "expected": "left downwind",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the entry instruction: “enter left downwind runway {rwy}”."
+          },
+          {
+            "id": "runway",
+            "label": "runway readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You forgot to read back the runway assignment.",
+            "feedbackWrong": "You read back runway {heard}, but Tower assigned runway {rwy}."
+          },
+          {
+            "id": "report",
+            "label": "the report point",
+            "extractor": "intent",
+            "expected": "report midfield",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Acknowledge the report point: “will report midfield”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "midfield"
+    },
+    {
+      "id": "midfield",
+      "type": "event",
+      "text": "You join the left downwind for runway {rwy}. You're now midfield — time to report.",
+      "next": "midfield_call"
+    },
+    {
+      "id": "midfield_call",
+      "type": "studentCall",
+      "prompt": "Report midfield downwind, as instructed.",
+      "hint": "Skyhawk {callsign}, midfield left downwind runway {rwy}.",
+      "call": {
+        "elements": [
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "midfield report",
+            "extractor": "intent",
+            "expected": "midfield downwind",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Report the position Tower asked for: “midfield left downwind”."
+          }
+        ]
+      },
+      "next": "tower_cleared"
+    },
+    {
+      "id": "tower_cleared",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, runway {rwy}, cleared to land.",
+      "next": "landing_readback"
+    },
+    {
+      "id": "landing_readback",
+      "type": "studentCall",
+      "prompt": "Read back your landing clearance.",
+      "hint": "Cleared to land runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "clearance",
+            "label": "landing clearance readback",
+            "extractor": "phrase",
+            "expected": "cleared to land",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Read back the clearance: “cleared to land”. “Roger” doesn't confirm you heard it correctly."
+          },
+          {
+            "id": "runway",
+            "label": "runway readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You forgot to read back the runway with your landing clearance.",
+            "feedbackWrong": "You read back runway {heard}, but you're cleared to land runway {rwy}."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "landed"
+    },
+    {
+      "id": "landed",
+      "type": "event",
+      "text": "You land on runway {rwy} and roll out. Tower calls as you slow.",
+      "next": "tower_taxi"
+    },
+    {
+      "id": "tower_taxi",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, turn left when able, taxi to the ramp, remain this frequency.",
+      "next": "taxi_readback"
+    },
+    {
+      "id": "taxi_readback",
+      "type": "studentCall",
+      "prompt": "Read back the taxi instruction.",
+      "hint": "Left when able, taxi to the ramp, remain this frequency, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "instruction",
+            "label": "taxi instruction readback",
+            "extractor": "intent",
+            "expected": "taxi to the ramp",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the instruction: “taxi to the ramp”."
+          },
+          {
+            "id": "frequency_note",
+            "label": "remain this frequency",
+            "extractor": "intent",
+            "expected": "remain this frequency",
+            "required": false,
+            "weight": 1,
+            "feedbackMissing": "Acknowledge “remain this frequency” — it tells Tower you won't switch to Ground."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": null
+    }
+  ]
+}

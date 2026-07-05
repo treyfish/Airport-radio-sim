@@ -1,0 +1,562 @@
+{
+  "id": "classc-departure",
+  "level": 4,
+  "title": "Class C departure: clearance delivery to departure",
+  "briefing": {
+    "airport": "Metro Intl (KMTO) — Class C",
+    "description": "Busy airspace now. Departing a Class C airport VFR means one extra stop before Ground: Clearance Delivery. You'll copy a departure clearance (heading, altitude, departure frequency, squawk) and read all of it back, then work Ground, Tower, and finally check in with Departure. Copy carefully — this is the longest readback you've done.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "atisText": "Metro International information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Departing runway {rwy}. VFR departures advise Clearance Delivery of direction of flight. Advise on initial contact you have information {atis}.",
+    "frequencies": [
+      { "name": "ATIS", "mhz": "127.1" },
+      { "name": "Clearance", "mhz": "118.9" },
+      { "name": "Ground", "mhz": "121.9" },
+      { "name": "Tower", "mhz": "120.5" },
+      { "name": "Departure", "mhz": "119.2" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["27", "09"] },
+    { "name": "atis", "kind": "choice", "choices": ["kilo", "lima", "mike", "papa"] },
+    { "name": "wind_dir", "kind": "choice", "choices": ["260", "270", "280", "090"] },
+    { "name": "wind_kt", "kind": "choice", "choices": ["8", "10", "14"] },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } },
+    { "name": "hdg", "kind": "choice", "choices": ["270", "300", "240"] }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "atis",
+      "type": "atcSay",
+      "speaker": "ATIS",
+      "text": "Metro International information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Departing runway {rwy}. VFR departures advise Clearance Delivery of direction of flight. Advise on initial contact you have information {atis}.",
+      "next": "tune_clearance"
+    },
+    {
+      "id": "tune_clearance",
+      "type": "event",
+      "text": "ATIS copied. Pen ready — you tune Clearance Delivery, 118.9.",
+      "next": "clearance_call"
+    },
+    {
+      "id": "clearance_call",
+      "type": "studentCall",
+      "prompt": "Call Clearance Delivery: who you are, where you're parked, ATIS, and your request — VFR to Cedar Valley at 4,500.",
+      "hint": "Metro Clearance, Skyhawk {callsign}, at the east ramp with information {atis}, request VFR departure to Cedar Valley at four thousand five hundred.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Metro Clearance",
+            "extractor": "facility",
+            "expected": "metro clearance",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Metro Clearance”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your full callsign on initial contact."
+          },
+          {
+            "id": "atis",
+            "label": "the ATIS code",
+            "extractor": "atis",
+            "expected": "{atis}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report the ATIS: “with information {atis}”.",
+            "feedbackWrong": "You said information {heard}, but the current ATIS is {atis}."
+          },
+          {
+            "id": "request",
+            "label": "the VFR departure request",
+            "extractor": "intent",
+            "expected": "vfr to cedar valley",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "State the request with direction/destination: “request VFR departure to Cedar Valley”."
+          },
+          {
+            "id": "altitude",
+            "label": "requested altitude",
+            "extractor": "altitude",
+            "expected": "four thousand five hundred",
+            "required": true,
+            "weight": 1,
+            "feedbackMissing": "Include your requested cruise altitude: “at four thousand five hundred”.",
+            "feedbackWrong": "You requested {heard} feet — the plan was 4,500."
+          }
+        ]
+      },
+      "next": "clearance"
+    },
+    {
+      "id": "clearance",
+      "type": "atcSay",
+      "speaker": "Clearance",
+      "text": "Skyhawk {callsign}, Metro Clearance. Cleared out of the Metro Class Charlie airspace. On departure, fly heading {hdg}, maintain at or below two thousand five hundred. Departure frequency one one niner point two, squawk {squawk}.",
+      "setsVariables": { "squawk": "{gen:squawk}" },
+      "next": "clearance_readback"
+    },
+    {
+      "id": "clearance_readback",
+      "type": "studentCall",
+      "prompt": "Read back the full clearance: heading, altitude restriction, departure frequency, and squawk.",
+      "hint": "Heading {hdg}, at or below two thousand five hundred, departure one one niner point two, squawk {squawk}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "heading",
+            "label": "heading readback",
+            "extractor": "phrase",
+            "expected": "heading {hdg}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You missed the assigned heading — read back “fly heading {hdg}”."
+          },
+          {
+            "id": "altitude",
+            "label": "altitude restriction readback",
+            "extractor": "altitude",
+            "expected": "two thousand five hundred",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You missed the altitude restriction: “at or below two thousand five hundred”.",
+            "feedbackWrong": "You read back {heard} feet, but the restriction is at or below 2,500."
+          },
+          {
+            "id": "frequency",
+            "label": "departure frequency readback",
+            "extractor": "frequency",
+            "expected": "119.2",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You missed the departure frequency: “one one niner point two”.",
+            "feedbackWrong": "You read back {heard}, but departure is on 119.2."
+          },
+          {
+            "id": "squawk",
+            "label": "squawk readback",
+            "extractor": "squawk",
+            "expected": "{squawk}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You forgot to read back the squawk code.",
+            "feedbackWrong": "You read back {heard}, but the assigned squawk is {squawk}."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "readback_correct"
+    },
+    {
+      "id": "readback_correct",
+      "type": "atcSay",
+      "speaker": "Clearance",
+      "text": "Skyhawk {callsign}, readback correct. Contact Ground point niner when ready to taxi.",
+      "next": "tune_ground"
+    },
+    {
+      "id": "tune_ground",
+      "type": "event",
+      "text": "Transponder set to {squawk}. You switch to Ground, 121.9.",
+      "next": "ground_call"
+    },
+    {
+      "id": "ground_call",
+      "type": "studentCall",
+      "prompt": "Call Ground for taxi. You're at the east ramp with your clearance.",
+      "hint": "Metro Ground, Skyhawk {callsign}, east ramp with {atis} and clearance, ready to taxi.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Metro Ground",
+            "extractor": "facility",
+            "expected": "metro ground",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Metro Ground”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "your position",
+            "extractor": "intent",
+            "expected": "east ramp",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Tell Ground where you are: “east ramp”."
+          },
+          {
+            "id": "request",
+            "label": "the taxi request",
+            "extractor": "intent",
+            "expected": "ready to taxi",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Say the request: “ready to taxi”."
+          }
+        ]
+      },
+      "next": "ground_taxi"
+    },
+    {
+      "id": "ground_taxi",
+      "type": "atcSay",
+      "speaker": "Ground",
+      "text": "Skyhawk {callsign}, Metro Ground, runway {rwy}, taxi via bravo, hold short of runway {rwy}.",
+      "next": "taxi_readback"
+    },
+    {
+      "id": "taxi_readback",
+      "type": "studentCall",
+      "prompt": "Read back the taxi instruction — including the hold short.",
+      "hint": "Runway {rwy} via bravo, hold short runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "runway",
+            "label": "runway readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You forgot to read back the runway assignment.",
+            "feedbackWrong": "You read back runway {heard}, but Ground assigned runway {rwy}."
+          },
+          {
+            "id": "route",
+            "label": "taxi route readback",
+            "extractor": "phrase",
+            "expected": "via bravo",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the route: “via bravo”."
+          },
+          {
+            "id": "holdshort",
+            "label": "hold-short readback",
+            "extractor": "phrase",
+            "expected": "hold short",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Hold-short instructions must always be read back word for word — “hold short runway {rwy}”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "holding_short"
+    },
+    {
+      "id": "holding_short",
+      "type": "event",
+      "text": "Run-up complete, holding short of runway {rwy}. Ground hands you to Tower on 120.5.",
+      "next": "tower_call"
+    },
+    {
+      "id": "tower_call",
+      "type": "studentCall",
+      "prompt": "Call Tower — holding short of runway {rwy}, ready for departure.",
+      "hint": "Metro Tower, Skyhawk {callsign}, holding short runway {rwy}, ready for departure.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Metro Tower",
+            "extractor": "facility",
+            "expected": "metro tower",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Metro Tower”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "holding short report",
+            "extractor": "intent",
+            "expected": "holding short runway {rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report your position: “holding short runway {rwy}”."
+          },
+          {
+            "id": "request",
+            "label": "ready for departure",
+            "extractor": "intent",
+            "expected": "ready for departure",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "State the request: “ready for departure”."
+          }
+        ]
+      },
+      "next": "tower_luaw"
+    },
+    {
+      "id": "tower_luaw",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, runway {rwy}, line up and wait — traffic crossing downfield.",
+      "next": "luaw_readback"
+    },
+    {
+      "id": "luaw_readback",
+      "type": "studentCall",
+      "prompt": "“Line up and wait” means take the runway but do NOT depart. Read it back.",
+      "hint": "Runway {rwy}, line up and wait, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "luaw",
+            "label": "line up and wait readback",
+            "extractor": "phrase",
+            "expected": "line up and wait",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Read back “line up and wait” exactly — never confuse it with a takeoff clearance."
+          },
+          {
+            "id": "runway",
+            "label": "runway readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include the runway in the readback.",
+            "feedbackWrong": "You read back runway {heard}, but the instruction was for runway {rwy}."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "tower_cleared"
+    },
+    {
+      "id": "tower_cleared",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, runway {rwy}, cleared for takeoff, fly heading {hdg}.",
+      "next": "takeoff_readback"
+    },
+    {
+      "id": "takeoff_readback",
+      "type": "studentCall",
+      "prompt": "Read back the takeoff clearance and heading.",
+      "hint": "Cleared for takeoff runway {rwy}, heading {hdg}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "clearance",
+            "label": "takeoff clearance readback",
+            "extractor": "phrase",
+            "expected": "cleared for takeoff",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Read back the clearance: “cleared for takeoff”."
+          },
+          {
+            "id": "runway",
+            "label": "runway readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the runway with the clearance.",
+            "feedbackWrong": "You read back runway {heard}, but you're cleared on runway {rwy}."
+          },
+          {
+            "id": "heading",
+            "label": "heading readback",
+            "extractor": "phrase",
+            "expected": "heading {hdg}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the assigned heading: “fly heading {hdg}”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "airborne"
+    },
+    {
+      "id": "airborne",
+      "type": "event",
+      "text": "You depart runway {rwy} and turn to heading {hdg}, climbing through 1,200 feet.",
+      "next": "to_departure"
+    },
+    {
+      "id": "to_departure",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, contact Departure.",
+      "next": "dep_ack"
+    },
+    {
+      "id": "dep_ack",
+      "type": "studentCall",
+      "prompt": "Acknowledge the handoff to Departure.",
+      "hint": "Over to Departure, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "ack",
+            "label": "handoff acknowledgment",
+            "extractor": "intent",
+            "expected": "departure",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Acknowledge the handoff — “over to Departure” with your callsign."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          }
+        ]
+      },
+      "next": "switch_dep"
+    },
+    {
+      "id": "switch_dep",
+      "type": "atcSay",
+      "speaker": "Departure",
+      "text": "Metro Departure — frequency is busy with airline traffic. You find a gap.",
+      "setsFrequency": "119.2",
+      "next": "dep_checkin"
+    },
+    {
+      "id": "dep_checkin",
+      "type": "studentCall",
+      "prompt": "Check in with Departure: callsign and altitude (passing 1,500, climbing to your restriction 2,500).",
+      "hint": "Metro Departure, Skyhawk {callsign}, one thousand five hundred climbing two thousand five hundred.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Metro Departure",
+            "extractor": "facility",
+            "expected": "metro departure",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Metro Departure”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "altitude",
+            "label": "altitude report (climbing to)",
+            "extractor": "altitude",
+            "expected": "two thousand five hundred",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report your altitude and what you're climbing to — Departure verifies your Mode C with it.",
+            "feedbackWrong": "You reported climbing to {heard} feet, but your restriction is 2,500."
+          }
+        ]
+      },
+      "next": "radar_contact"
+    },
+    {
+      "id": "radar_contact",
+      "type": "atcSay",
+      "speaker": "Departure",
+      "text": "Skyhawk {callsign}, Metro Departure, radar contact. Leaving the Class Charlie, resume own navigation, altitude your discretion. Good day.",
+      "next": "final_ack"
+    },
+    {
+      "id": "final_ack",
+      "type": "studentCall",
+      "prompt": "Acknowledge — you're free to navigate and climb on course.",
+      "hint": "Resume own navigation, altitude my discretion, Skyhawk {callsign}. Good day.",
+      "call": {
+        "elements": [
+          {
+            "id": "ack",
+            "label": "acknowledgment",
+            "extractor": "intent",
+            "expected": "own navigation",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Acknowledge the instruction: “resume own navigation”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End with your callsign."
+          }
+        ]
+      },
+      "next": null
+    }
+  ]
+}

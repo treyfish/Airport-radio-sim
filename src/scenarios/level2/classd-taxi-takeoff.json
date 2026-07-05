@@ -1,0 +1,339 @@
+{
+  "id": "classd-taxi-takeoff",
+  "level": 2,
+  "title": "Class D departure: ground and tower",
+  "briefing": {
+    "airport": "Centerville Rgnl (KCVL) — Class D",
+    "description": "First towered-field departure. You'll listen to the ATIS, call Ground for taxi with the ATIS code, read back your taxi instructions, then call Tower when you're ready to go — and read back your clearance word for word. Runway assignments and hold-short instructions must always be read back.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "atisText": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+    "frequencies": [
+      { "name": "ATIS", "mhz": "124.2" },
+      { "name": "Ground", "mhz": "121.7" },
+      { "name": "Tower", "mhz": "118.3" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["13", "31"] },
+    { "name": "atis", "kind": "choice", "choices": ["alpha", "bravo", "charlie", "delta"] },
+    { "name": "wind_dir", "kind": "choice", "choices": ["120", "130", "140", "300", "310"] },
+    { "name": "wind_kt", "kind": "choice", "choices": ["6", "8", "10", "12"] },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "atis",
+      "type": "atcSay",
+      "speaker": "ATIS",
+      "text": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+      "next": "tune_ground"
+    },
+    {
+      "id": "tune_ground",
+      "type": "event",
+      "text": "You copy the ATIS and switch to Ground, 121.7.",
+      "next": "ground_call"
+    },
+    {
+      "id": "ground_call",
+      "type": "studentCall",
+      "prompt": "Call Ground for taxi. You're at the main ramp, VFR to the practice area, and you have information {atis}.",
+      "hint": "Centerville Ground, Skyhawk {callsign}, at the main ramp with information {atis}, ready to taxi, VFR to the practice area.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Centerville Ground",
+            "extractor": "facility",
+            "expected": "centerville ground",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility first: “Centerville Ground”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your full callsign on initial contact."
+          },
+          {
+            "id": "position",
+            "label": "your position on the field",
+            "extractor": "intent",
+            "expected": "at the main ramp",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Tell Ground where you are on the airport — “at the main ramp”."
+          },
+          {
+            "id": "atis",
+            "label": "the ATIS code",
+            "extractor": "atis",
+            "expected": "{atis}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Report the ATIS: “with information {atis}”. It saves the controller reading you the weather.",
+            "feedbackWrong": "You said information {heard}, but the current ATIS is {atis}."
+          },
+          {
+            "id": "request",
+            "label": "the taxi request",
+            "extractor": "intent",
+            "expected": "ready to taxi",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Say what you want: “ready to taxi, VFR to the practice area”."
+          }
+        ]
+      },
+      "next": "ground_taxi"
+    },
+    {
+      "id": "ground_taxi",
+      "type": "atcSay",
+      "speaker": "Ground",
+      "text": "Skyhawk {callsign}, Centerville Ground, runway {rwy}, taxi via alpha.",
+      "next": "taxi_readback"
+    },
+    {
+      "id": "taxi_readback",
+      "type": "studentCall",
+      "prompt": "Read back your taxi instructions.",
+      "hint": "Runway {rwy}, taxi via alpha, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "runway",
+            "label": "runway assignment readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "You forgot to read back the runway assignment — runway assignments must always be read back.",
+            "feedbackWrong": "You read back runway {heard}, but Ground assigned runway {rwy}."
+          },
+          {
+            "id": "route",
+            "label": "taxi route readback",
+            "extractor": "phrase",
+            "expected": "via alpha",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Read back the taxi route: “via alpha”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End readbacks with your callsign so the controller knows who's answering."
+          }
+        ]
+      },
+      "next": "holding_short"
+    },
+    {
+      "id": "holding_short",
+      "type": "event",
+      "text": "You taxi via Alpha and complete your run-up. Now holding short of runway {rwy}, you switch to Tower, 118.3.",
+      "next": "tower_call"
+    },
+    {
+      "id": "tower_call",
+      "type": "studentCall",
+      "prompt": "Call Tower — you're holding short of runway {rwy}, ready for departure.",
+      "hint": "Centerville Tower, Skyhawk {callsign}, holding short runway {rwy}, ready for departure.",
+      "call": {
+        "elements": [
+          {
+            "id": "facility",
+            "label": "addressing Centerville Tower",
+            "extractor": "facility",
+            "expected": "centerville tower",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Address the facility: “Centerville Tower”."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include your callsign."
+          },
+          {
+            "id": "position",
+            "label": "holding short report",
+            "extractor": "intent",
+            "expected": "holding short runway {rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Tell Tower where you are: “holding short runway {rwy}”."
+          },
+          {
+            "id": "request",
+            "label": "ready for departure",
+            "extractor": "intent",
+            "expected": "ready for departure",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "State your request: “ready for departure”."
+          }
+        ]
+      },
+      "next": [
+        { "when": "random", "weight": 2, "goTo": "tower_cleared" },
+        { "when": "random", "weight": 1, "goTo": "tower_hold" }
+      ]
+    },
+    {
+      "id": "tower_hold",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, hold short runway {rwy}, landing traffic.",
+      "next": "hold_readback"
+    },
+    {
+      "id": "hold_readback",
+      "type": "studentCall",
+      "prompt": "Tower told you to hold short. Hold-short instructions require a full readback.",
+      "hint": "Hold short runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "holdshort",
+            "label": "hold-short readback",
+            "extractor": "phrase",
+            "expected": "hold short",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Hold-short instructions must be read back word for word: “hold short runway {rwy}”. “Roger” is not enough."
+          },
+          {
+            "id": "runway",
+            "label": "the runway",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Include the runway in the hold-short readback.",
+            "feedbackWrong": "You read back runway {heard}, but the instruction was for runway {rwy}."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "traffic_lands"
+    },
+    {
+      "id": "traffic_lands",
+      "type": "event",
+      "text": "A Cherokee floats past and lands. It clears the runway at the far end.",
+      "next": "tower_cleared"
+    },
+    {
+      "id": "tower_cleared",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, runway {rwy}, cleared for takeoff.",
+      "next": "takeoff_readback"
+    },
+    {
+      "id": "takeoff_readback",
+      "type": "studentCall",
+      "prompt": "Read back your takeoff clearance.",
+      "hint": "Cleared for takeoff runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          {
+            "id": "clearance",
+            "label": "takeoff clearance readback",
+            "extractor": "phrase",
+            "expected": "cleared for takeoff",
+            "required": true,
+            "weight": 3,
+            "feedbackMissing": "Read back the clearance itself: “cleared for takeoff”."
+          },
+          {
+            "id": "runway",
+            "label": "runway readback",
+            "extractor": "runway",
+            "expected": "{rwy}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "You forgot to read back the runway — runway assignments must always be read back.",
+            "feedbackWrong": "You read back runway {heard}, but you were cleared on runway {rwy}."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "End the readback with your callsign."
+          }
+        ]
+      },
+      "next": "airborne"
+    },
+    {
+      "id": "airborne",
+      "type": "event",
+      "text": "You take the runway and depart. Climbing through 1,500 feet, Tower calls you.",
+      "next": "freq_change"
+    },
+    {
+      "id": "freq_change",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, frequency change approved. Good day.",
+      "next": "freq_ack"
+    },
+    {
+      "id": "freq_ack",
+      "type": "studentCall",
+      "prompt": "Acknowledge the frequency change.",
+      "hint": "Frequency change approved, Skyhawk {callsign}. Good day.",
+      "call": {
+        "elements": [
+          {
+            "id": "ack",
+            "label": "frequency change acknowledgment",
+            "extractor": "intent",
+            "expected": "frequency change",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Acknowledge the instruction — “frequency change approved” or at minimum your callsign."
+          },
+          {
+            "id": "callsign",
+            "label": "your callsign",
+            "extractor": "callsign",
+            "expected": "{callsign}",
+            "required": true,
+            "weight": 2,
+            "feedbackMissing": "Every acknowledgment needs your callsign."
+          }
+        ]
+      },
+      "next": null
+    }
+  ]
+}
