@@ -95,6 +95,28 @@ describe("rule-based grader", () => {
     expect(r.styleNotes.some((n) => n.includes("with you"))).toBe(true);
   });
 
+  it("coaches on slow response delay without affecting the score", () => {
+    const good = "Cleared for takeoff runway 18, N123AB";
+    const slow = grader.grade(good, takeoffReadback, env, { timing: { delaySec: 12 } });
+    expect(slow.styleNotes.some((n) => n.includes("12 seconds"))).toBe(true);
+    expect(slow.score).toBe(100);
+
+    const prompt = grader.grade(good, takeoffReadback, env, { timing: { delaySec: 2.5 } });
+    expect(prompt.styleNotes.some((n) => n.includes("seconds to key up"))).toBe(false);
+  });
+
+  it("coaches on speaking pace at both extremes", () => {
+    const good = "Cleared for takeoff runway 18, N123AB";
+    const fast = grader.grade(good, takeoffReadback, env, { timing: { wpm: 220 } });
+    expect(fast.styleNotes.some((n) => n.includes("rushing"))).toBe(true);
+
+    const slow = grader.grade(good, takeoffReadback, env, { timing: { wpm: 60 } });
+    expect(slow.styleNotes.some((n) => n.includes("touch slow"))).toBe(true);
+
+    const normal = grader.grade(good, takeoffReadback, env, { timing: { wpm: 145 } });
+    expect(normal.styleNotes.some((n) => n.includes("rushing") || n.includes("touch slow"))).toBe(false);
+  });
+
   it("never penalizes optional elements", () => {
     const call: ExpectedCall = {
       elements: [

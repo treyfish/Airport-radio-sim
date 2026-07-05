@@ -33,6 +33,10 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
   const pttRef = useRef<PttSession | null>(null);
   const startedRef = useRef(false);
   const voiceInputRef = useRef(false);
+  const cueShownAtRef = useRef<number | null>(null);
+  const transmissionStartRef = useRef<number | null>(null);
+  const pttStartAtRef = useRef<number | null>(null);
+  const pttDurationMsRef = useRef<number | null>(null);
   const hasVoice = recognitionAvailable();
 
   const append = useCallback((entry: TranscriptEntry) => {
@@ -64,6 +68,8 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
             setHintShown(false);
             setAwaitingCall(true);
             setBusy(false);
+            cueShownAtRef.current = performance.now();
+            transmissionStartRef.current = null;
             return;
           case "end":
             setBusy(false);
@@ -74,6 +80,10 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
         }
       }
       setBusy(false);
+      // reaching here means a say-again or chatter finished while a call is
+      // still pending — restart the response-delay clock
+      cueShownAtRef.current = performance.now();
+      transmissionStartRef.current = null;
     },
     [append, settings, onFinish],
   );
@@ -94,7 +104,22 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
       setInput("");
       setInterim("");
       setPttState("idle");
-      const result = engine.submitStudentCall(text, { voiceInput: viaVoice });
+
+      const now = performance.now();
+      const startedAt = transmissionStartRef.current ?? now;
+      const delaySec = cueShownAtRef.current !== null ? (startedAt - cueShownAtRef.current) / 1000 : undefined;
+      const words = text.split(/\s+/).length;
+      const wpm =
+        viaVoice && pttDurationMsRef.current && pttDurationMsRef.current > 500
+          ? Math.round(words / (pttDurationMsRef.current / 60000))
+          : undefined;
+      transmissionStartRef.current = null;
+      pttDurationMsRef.current = null;
+
+      const result = engine.submitStudentCall(text, {
+        voiceInput: viaVoice,
+        timing: { delaySec, wpm },
+      });
       setLastGrade(result.grade);
       if (result.advanced) {
         setAwaitingCall(false);
@@ -135,10 +160,14 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
     if (settings.fxOn) playSquelch();
     setInterim("");
     setPttState("keyed");
+    transmissionStartRef.current = performance.now();
+    pttStartAtRef.current = performance.now();
     const session = startPtt({
       onInterim: setInterim,
       onFinal: (text) => {
         if (settings.fxOn) playSquelch();
+        pttDurationMsRef.current =
+          pttStartAtRef.current !== null ? performance.now() - pttStartAtRef.current : null;
         if (text) {
           setInput(text);
           setPttState("review");
@@ -231,6 +260,9 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
                   : "Type your radio call here"
             }
             onChange={(e) => {
+              if (transmissionStartRef.current === null && e.target.value.trim()) {
+                transmissionStartRef.current = performance.now();
+              }
               setInput(e.target.value);
               voiceInputRef.current = false;
             }}

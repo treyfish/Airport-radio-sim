@@ -13,7 +13,13 @@ import type {
 } from "../types/scenario";
 import { renderTemplate, type Env } from "./templates";
 import { mulberry32, resolveVariables, generateValue, type Rng } from "./variables";
-import { defaultGrader, type Grader, type GradeResult, type GradeOptions } from "../grader/grader";
+import {
+  defaultGrader,
+  type Grader,
+  type GradeResult,
+  type GradeOptions,
+  type CallTiming,
+} from "../grader/grader";
 
 export const MAX_ATTEMPTS = 3; // first try + 2 retries
 
@@ -21,7 +27,7 @@ export interface StepResult {
   stepId: string;
   prompt: string;
   hint: string;
-  attempts: { input: string; grade: GradeResult }[];
+  attempts: { input: string; grade: GradeResult; timing?: CallTiming }[];
   bestGrade: GradeResult;
   hintUsed: boolean;
   /** step score after hint cap */
@@ -164,7 +170,7 @@ export class ScenarioEngine {
       throw new Error("No student call is pending");
     }
     const grade = this.grader.grade(raw, step.call, this.env, opts);
-    this.pending.attempts.push({ input: raw, grade });
+    this.pending.attempts.push({ input: raw, grade, timing: opts.timing });
     if (grade.score >= this.pending.bestGrade.score || this.pending.attempts.length === 1) {
       this.pending.bestGrade = grade;
     }

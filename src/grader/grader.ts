@@ -28,9 +28,17 @@ export interface GradeResult {
   styleNotes: string[];
 }
 
+export interface CallTiming {
+  /** seconds from the cue (ATC finished / prompt shown) to transmission start */
+  delaySec?: number;
+  /** spoken words per minute, measured over the PTT-held duration (voice only) */
+  wpm?: number;
+}
+
 export interface GradeOptions {
   /** true when the input came from speech recognition (suppresses pronunciation notes) */
   voiceInput?: boolean;
+  timing?: CallTiming;
 }
 
 export interface Grader {
@@ -77,6 +85,32 @@ function collectStyleNotes(raw: string, voiceInput: boolean): string[] {
   return notes;
 }
 
+// Advisory pace/delay coaching — never affects the score. Radio speech runs
+// ~150 wpm; long gaps after an instruction get filled by other traffic.
+export const DELAY_SLOW_SEC = 8;
+export const WPM_FAST = 185;
+export const WPM_SLOW = 85;
+
+function collectTimingNotes(timing: CallTiming | undefined): string[] {
+  if (!timing) return [];
+  const notes: string[] = [];
+  if (timing.delaySec !== undefined && timing.delaySec > DELAY_SLOW_SEC) {
+    notes.push(
+      `You took ${Math.round(timing.delaySec)} seconds to key up — on a busy frequency that gap gets filled. Compose the call in your head, then transmit.`,
+    );
+  }
+  if (timing.wpm !== undefined && timing.wpm > WPM_FAST) {
+    notes.push(
+      "You're rushing. Controllers copy best around 150 words per minute — slow, steady, and clear beats fast.",
+    );
+  } else if (timing.wpm !== undefined && timing.wpm > 0 && timing.wpm < WPM_SLOW) {
+    notes.push(
+      "A touch slow — aim for a steady, brisk cadence so you don't tie up the frequency.",
+    );
+  }
+  return notes;
+}
+
 export class RuleBasedGrader implements Grader {
   grade(input: string, call: ExpectedCall, env: Env, opts: GradeOptions = {}): GradeResult {
     const inputTokens = normalize(tokenize(input));
@@ -99,7 +133,10 @@ export class RuleBasedGrader implements Grader {
       score,
       passed: score >= STEP_PASS_SCORE,
       elements,
-      styleNotes: collectStyleNotes(input, opts.voiceInput ?? false),
+      styleNotes: [
+        ...collectStyleNotes(input, opts.voiceInput ?? false),
+        ...collectTimingNotes(opts.timing),
+      ],
     };
   }
 }

@@ -222,6 +222,7 @@ input:focus { outline: 2px solid var(--accent-dim); }
 .step-score.pass { color: var(--accent); }
 .step-score.fail { color: var(--warn); }
 .you-said { color: var(--text-dim); font-size: 0.92rem; }
+.you-said .timing { color: var(--accent-dim); white-space: nowrap; }
 
 .element-checklist { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 5px; }
 .element { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.92rem; align-items: baseline; }

@@ -45,6 +45,13 @@ export default function Debrief({ data, onRetry, onDone }: Props) {
 
             <p className="you-said">
               <strong>You said:</strong> “{lastAttempt?.input ?? "—"}”
+              {lastAttempt?.timing && (lastAttempt.timing.delaySec !== undefined || lastAttempt.timing.wpm) && (
+                <span className="timing">
+                  {lastAttempt.timing.delaySec !== undefined &&
+                    ` · responded in ${lastAttempt.timing.delaySec.toFixed(1)} s`}
+                  {lastAttempt.timing.wpm ? ` · ~${lastAttempt.timing.wpm} wpm` : ""}
+                </span>
+              )}
             </p>
 
             <ul className="element-checklist">
