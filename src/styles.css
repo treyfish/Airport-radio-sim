@@ -251,6 +251,26 @@ input:focus { outline: 2px solid var(--accent-dim); }
 .header-link { margin-left: auto; }
 .learn-btn { font-size: 0.8rem; }
 
+/* ---- drills ---- */
+.drill { display: flex; flex-direction: column; gap: 12px; }
+.drill-desc { color: var(--text-dim); margin: 0; }
+.drill-playbar { display: flex; align-items: center; gap: 12px; }
+.replay-count { color: var(--warn); font-size: 0.85rem; }
+.flash-text { background: var(--bg-inset); border-radius: var(--radius); padding: 10px 14px; }
+.drill-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.drill-fields .field { display: flex; flex-direction: column; gap: 5px; }
+.drill-fields .field span { font-size: 0.85rem; color: var(--text-dim); }
+.field-ok { color: var(--accent); }
+.field-bad { color: var(--danger); }
+.drill-result { display: flex; align-items: center; gap: 16px; }
+.drill-score { font-size: 1.4rem; font-weight: 800; margin: 0; }
+.your-callsign-reminder { background: var(--bg-inset); border-radius: var(--radius); padding: 8px 12px; }
+.disc-round { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.disc-count { color: var(--text-dim); font-size: 0.85rem; margin: 0; }
+.disc-buttons { display: flex; gap: 12px; }
+.primary-btn.secondary { background: var(--bg-raised); color: var(--text); border: 2px solid var(--border); }
+.disc-feedback { margin: 0; color: var(--text-dim); }
+
 /* ---- glossary ---- */
 .glossary { display: flex; flex-direction: column; gap: 12px; }
 .glossary-list { display: flex; flex-direction: column; gap: 10px; }

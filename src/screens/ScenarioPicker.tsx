@@ -2,17 +2,19 @@ import { useState } from "react";
 import type { Scenario } from "../types/scenario";
 import { scenarios, scenariosByLevel, LEVEL_TITLES } from "../scenarios";
 import { levelUnlocked, type PersistedState, type Settings } from "../state/persistence";
+import { DRILLS, type DrillSpec } from "../drills/drills";
 
 interface Props {
   persisted: PersistedState;
   onPick(scenario: Scenario): void;
   onSettingsChange(settings: Settings): void;
   onLearn(level: number): void;
+  onDrill(spec: DrillSpec): void;
 }
 
 const scenarioLevels = new Map(scenarios.map((s) => [s.id, s.level as number]));
 
-export default function ScenarioPicker({ persisted, onPick, onSettingsChange, onLearn }: Props) {
+export default function ScenarioPicker({ persisted, onPick, onSettingsChange, onLearn, onDrill }: Props) {
   const { settings, progress } = persisted;
   const [callsignDraft, setCallsignDraft] = useState(settings.callsign);
 
@@ -53,6 +55,28 @@ export default function ScenarioPicker({ persisted, onPick, onSettingsChange, on
             />
             Radio static effects
           </label>
+        </div>
+      </section>
+
+      <section className="level-section">
+        <h2>🎧 Listening drills</h2>
+        <div className="scenario-grid">
+          {DRILLS.map((spec) => {
+            const p = progress[`drill:${spec.id}`];
+            return (
+              <button key={spec.id} className="scenario-card card" onClick={() => onDrill(spec)}>
+                <span className="scenario-title">{spec.icon} {spec.title}</span>
+                <span className="scenario-airport">{spec.description}</span>
+                {p && (
+                  <span className="scenario-meta">
+                    <span className={`best-score ${p.passed ? "pass" : ""}`}>
+                      best {p.bestScore}%{p.passed ? " ✓" : ""}
+                    </span>
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </section>
 

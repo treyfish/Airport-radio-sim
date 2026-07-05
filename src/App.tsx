@@ -8,9 +8,11 @@ import Radio from "./screens/Radio";
 import Debrief from "./screens/Debrief";
 import Lesson from "./screens/Lesson";
 import Glossary from "./screens/Glossary";
+import Drill from "./screens/Drill";
 import { lessonForLevel, type LessonDeck } from "./content/lessons";
+import type { DrillSpec } from "./drills/drills";
 
-type Screen = "picker" | "briefing" | "radio" | "debrief" | "lesson" | "glossary";
+type Screen = "picker" | "briefing" | "radio" | "debrief" | "lesson" | "glossary" | "drill";
 
 export interface DebriefData {
   scenario: Scenario;
@@ -25,6 +27,7 @@ export default function App() {
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [debrief, setDebrief] = useState<DebriefData | null>(null);
   const [lessonDeck, setLessonDeck] = useState<LessonDeck | null>(null);
+  const [drillSpec, setDrillSpec] = useState<DrillSpec | null>(null);
   const engineRef = useRef<ScenarioEngine | null>(null);
 
   const settings = persisted.settings;
@@ -59,7 +62,13 @@ export default function App() {
     setScenario(null);
     setDebrief(null);
     setLessonDeck(null);
+    setDrillSpec(null);
     setScreen("picker");
+  };
+
+  const openDrill = (spec: DrillSpec) => {
+    setDrillSpec(spec);
+    setScreen("drill");
   };
 
   const openLesson = (level: number) => {
@@ -90,8 +99,20 @@ export default function App() {
             onPick={pickScenario}
             onSettingsChange={updateSettings}
             onLearn={openLesson}
+            onDrill={openDrill}
           />
         );
+      case "drill":
+        return drillSpec ? (
+          <Drill
+            spec={drillSpec}
+            settings={settings}
+            onDone={(score) =>
+              setPersisted(recordResult(`drill:${drillSpec.id}`, score, score >= 70))
+            }
+            onBack={backToPicker}
+          />
+        ) : null;
       case "lesson":
         return lessonDeck ? (
           <Lesson deck={lessonDeck} onDone={finishLesson} onBack={backToPicker} />
