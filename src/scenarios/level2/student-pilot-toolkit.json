@@ -1,0 +1,145 @@
+{
+  "id": "student-pilot-toolkit",
+  "level": 2,
+  "title": "The student pilot toolkit: say again, slower",
+  "briefing": {
+    "airport": "Centerville Rgnl (KCVL) — Class D",
+    "description": "Every student's secret weapons: the phrase “student pilot” (controllers will slow down and simplify — it's in the AIM), “radio check”, and “say again slower”. In this scenario the Ground controller talks fast and you will NOT catch it all. That's the point. Asking for a repeat is professional; guessing on a readback is not.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "atisText": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+    "frequencies": [
+      { "name": "ATIS", "mhz": "124.2" },
+      { "name": "Ground", "mhz": "121.7" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["13", "31"] },
+    { "name": "atis", "kind": "choice", "choices": ["november", "oscar", "papa"] },
+    { "name": "wind_dir", "kind": "choice", "choices": ["120", "140", "310"] },
+    { "name": "wind_kt", "kind": "choice", "choices": ["5", "8", "11"] },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "atis",
+      "type": "atcSay",
+      "speaker": "ATIS",
+      "text": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+      "next": "avionics"
+    },
+    {
+      "id": "avionics",
+      "type": "event",
+      "text": "The radios just came back from the avionics shop, and this is your first solo trip to a towered field. Before asking for taxi, confirm the radio actually works.",
+      "next": "radio_check"
+    },
+    {
+      "id": "radio_check",
+      "type": "studentCall",
+      "prompt": "Ask Ground for a radio check, and let them know you're a student pilot.",
+      "hint": "Centerville Ground, Skyhawk {callsign}, student pilot, radio check.",
+      "call": {
+        "elements": [
+          { "id": "facility", "label": "addressing Centerville Ground", "extractor": "facility", "expected": "centerville ground", "required": true, "weight": 2, "feedbackMissing": "Address the facility: “Centerville Ground”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your callsign." },
+          { "id": "student", "label": "the “student pilot” callout", "extractor": "phrase", "expected": "student pilot", "required": true, "weight": 2, "feedbackMissing": "Say “student pilot” — the AIM recommends it, and controllers genuinely slow down for you." },
+          { "id": "request", "label": "the radio check request", "extractor": "intent", "expected": "radio check", "required": true, "weight": 2, "feedbackMissing": "Ask for the “radio check”." }
+        ]
+      },
+      "next": "check_reply"
+    },
+    {
+      "id": "check_reply",
+      "type": "atcSay",
+      "speaker": "Ground",
+      "text": "Skyhawk {callsign}, Centerville Ground, loud and clear.",
+      "next": "ready_taxi"
+    },
+    {
+      "id": "ready_taxi",
+      "type": "event",
+      "text": "Radio confirmed. Now ask for taxi — you're at the main ramp with information {atis}.",
+      "next": "taxi_request"
+    },
+    {
+      "id": "taxi_request",
+      "type": "studentCall",
+      "prompt": "Request taxi for pattern work: who you are, where you are, the ATIS.",
+      "hint": "Centerville Ground, Skyhawk {callsign}, student pilot, at the main ramp with information {atis}, ready to taxi for pattern work.",
+      "call": {
+        "elements": [
+          { "id": "facility", "label": "addressing Centerville Ground", "extractor": "facility", "expected": "centerville ground", "required": true, "weight": 2, "feedbackMissing": "Address the facility first." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your callsign." },
+          { "id": "position", "label": "your position on the field", "extractor": "intent", "expected": "at the main ramp", "required": true, "weight": 2, "feedbackMissing": "Tell Ground where you are: “at the main ramp”." },
+          { "id": "atis", "label": "the ATIS code", "extractor": "atis", "expected": "{atis}", "required": true, "weight": 2, "feedbackMissing": "Report the ATIS: “with information {atis}”.", "feedbackWrong": "You said information {heard}, but the current ATIS is {atis}." },
+          { "id": "request", "label": "the taxi request", "extractor": "intent", "expected": "ready to taxi", "required": true, "weight": 2, "feedbackMissing": "Make the request: “ready to taxi”." }
+        ]
+      },
+      "next": "fast_instruction"
+    },
+    {
+      "id": "fast_instruction",
+      "type": "atcSay",
+      "speaker": "Ground",
+      "text": "Skyhawk {callsign} Centerville Ground runway {rwy} taxi via alpha cross runway two two hold short of runway {rwy} at alpha three traffic is a King Air taxiing opposite direction.",
+      "next": "overwhelmed"
+    },
+    {
+      "id": "overwhelmed",
+      "type": "event",
+      "text": "…That was a firehose. You caught “runway {rwy}” and “via alpha” — the rest blurred past. Do NOT guess on a readback. Ask.",
+      "next": "say_again"
+    },
+    {
+      "id": "say_again",
+      "type": "studentCall",
+      "prompt": "Ask Ground to say it again, slower.",
+      "hint": "Skyhawk {callsign}, student pilot, say again slower please.",
+      "call": {
+        "elements": [
+          { "id": "sayagain", "label": "the say-again request", "extractor": "intent", "expected": "say again slower", "required": true, "weight": 3, "feedbackMissing": "Just ask: “say again slower”. Controllers vastly prefer a repeat over a wrong readback." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your callsign so Ground knows who's asking." }
+        ]
+      },
+      "next": "slow_instruction"
+    },
+    {
+      "id": "slow_instruction",
+      "type": "atcSay",
+      "speaker": "Ground",
+      "text": "Skyhawk {callsign}, no problem. Runway {rwy}... taxi via alpha... cross runway two two... then hold short of runway {rwy}.",
+      "next": "full_readback"
+    },
+    {
+      "id": "full_readback",
+      "type": "studentCall",
+      "prompt": "Now you have all of it. Read back every piece: runway, route, the crossing, and the hold short.",
+      "hint": "Runway {rwy}, taxi via alpha, cross runway two two, hold short runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "Read back the assigned runway.", "feedbackWrong": "You read back runway {heard}, but Ground assigned runway {rwy}." },
+          { "id": "route", "label": "taxi route readback", "extractor": "phrase", "expected": "via alpha", "required": true, "weight": 2, "feedbackMissing": "Read back the route: “via alpha”." },
+          { "id": "crossing", "label": "runway crossing readback", "extractor": "phrase", "expected": "cross runway two two", "required": true, "weight": 2, "feedbackMissing": "Read back the crossing: “cross runway two two” — runway crossings always get read back." },
+          { "id": "holdshort", "label": "hold-short readback", "extractor": "phrase", "expected": "hold short", "required": true, "weight": 3, "feedbackMissing": "Read back the hold short — word for word, every time." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "well_done"
+    },
+    {
+      "id": "well_done",
+      "type": "atcSay",
+      "speaker": "Ground",
+      "text": "Skyhawk {callsign}, readback correct. Nicely done — and don't hesitate to ask again, that's what we're here for.",
+      "next": "closing"
+    },
+    {
+      "id": "closing",
+      "type": "event",
+      "text": "Lesson locked in: “student pilot”, “radio check”, and “say again slower” are tools, not confessions. The pros use them too.",
+      "next": null
+    }
+  ]
+}

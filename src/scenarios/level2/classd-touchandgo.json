@@ -1,0 +1,173 @@
+{
+  "id": "classd-touchandgo",
+  "level": 2,
+  "title": "Pattern work with traffic: follow the Cherokee",
+  "briefing": {
+    "airport": "Centerville Rgnl (KCVL) — Class D",
+    "description": "Touch-and-go practice on a day when you're not the only one in the pattern. Tower will sequence you behind other traffic — your job is to spot the traffic, tell them you see it, and read back your option clearance. “Cleared for the option” means you may do a touch-and-go, stop-and-go, low approach, or full stop.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "atisText": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Few clouds at four thousand five hundred. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+    "frequencies": [
+      { "name": "ATIS", "mhz": "124.2" },
+      { "name": "Tower", "mhz": "118.3" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["13", "31"] },
+    { "name": "atis", "kind": "choice", "choices": ["uniform", "victor", "whiskey"] },
+    { "name": "wind_dir", "kind": "choice", "choices": ["130", "140", "310", "320"] },
+    { "name": "wind_kt", "kind": "choice", "choices": ["7", "10", "13"] },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } },
+    { "name": "direction", "kind": "choice", "choices": ["north", "west", "south"] }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "atis",
+      "type": "atcSay",
+      "speaker": "ATIS",
+      "text": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Few clouds at four thousand five hundred. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+      "next": "inbound"
+    },
+    {
+      "id": "inbound",
+      "type": "event",
+      "text": "You're 10 miles {direction}, inbound for pattern work. The frequency is lively today.",
+      "next": "initial_call"
+    },
+    {
+      "id": "initial_call",
+      "type": "studentCall",
+      "prompt": "Call Tower: position, ATIS, and your request — touch and goes.",
+      "hint": "Centerville Tower, Skyhawk {callsign}, one zero miles {direction} with information {atis}, request touch and goes.",
+      "call": {
+        "elements": [
+          { "id": "facility", "label": "addressing Centerville Tower", "extractor": "facility", "expected": "centerville tower", "required": true, "weight": 2, "feedbackMissing": "Address the facility: “Centerville Tower”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your full callsign on initial contact." },
+          { "id": "position", "label": "distance and direction", "extractor": "intent", "expected": "10 miles {direction}", "required": true, "weight": 2, "feedbackMissing": "Give your position: “one zero miles {direction}”." },
+          { "id": "atis", "label": "the ATIS code", "extractor": "atis", "expected": "{atis}", "required": true, "weight": 2, "feedbackMissing": "Report the ATIS: “with information {atis}”.", "feedbackWrong": "You said information {heard}, but the current ATIS is {atis}." },
+          { "id": "request", "label": "the request (touch and goes)", "extractor": "intent", "expected": "request touch and goes", "required": true, "weight": 2, "feedbackMissing": "Say what you want: “request touch and goes”." }
+        ]
+      },
+      "next": "entry"
+    },
+    {
+      "id": "entry",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, Centerville Tower, enter left downwind runway {rwy}, report midfield.",
+      "next": "entry_readback"
+    },
+    {
+      "id": "entry_readback",
+      "type": "studentCall",
+      "prompt": "Read back the entry and report point.",
+      "hint": "Enter left downwind runway {rwy}, will report midfield, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "entry", "label": "pattern entry readback", "extractor": "phrase", "expected": "left downwind", "required": true, "weight": 2, "feedbackMissing": "Read back the entry: “left downwind runway {rwy}”." },
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "Read back the runway.", "feedbackWrong": "You read back runway {heard}, but Tower said runway {rwy}." },
+          { "id": "report", "label": "the report point", "extractor": "intent", "expected": "report midfield", "required": true, "weight": 2, "feedbackMissing": "Acknowledge the report point: “will report midfield”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "midfield"
+    },
+    {
+      "id": "midfield",
+      "type": "event",
+      "text": "You join the downwind and reach midfield. Time to report.",
+      "next": "midfield_call"
+    },
+    {
+      "id": "midfield_call",
+      "type": "studentCall",
+      "prompt": "Report midfield downwind.",
+      "hint": "Skyhawk {callsign}, midfield left downwind runway {rwy}.",
+      "call": {
+        "elements": [
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your callsign." },
+          { "id": "position", "label": "midfield report", "extractor": "intent", "expected": "midfield downwind", "required": true, "weight": 3, "feedbackMissing": "Report the position Tower asked for: “midfield left downwind”." }
+        ]
+      },
+      "next": "sequence"
+    },
+    {
+      "id": "sequence",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, number two, follow the Cherokee on left base.",
+      "next": "traffic_readback"
+    },
+    {
+      "id": "traffic_readback",
+      "type": "studentCall",
+      "prompt": "Look for the Cherokee — there, on base. Tell Tower you have the traffic and your sequence.",
+      "hint": "Number two, traffic in sight, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "sequence", "label": "sequence acknowledgment (number two)", "extractor": "phrase", "expected": "number two", "required": true, "weight": 2, "feedbackMissing": "Acknowledge your sequence: “number two”." },
+          { "id": "traffic", "label": "traffic in sight", "extractor": "intent", "expected": "traffic in sight", "required": true, "weight": 3, "feedbackMissing": "Tell Tower you see the traffic: “traffic in sight”. If you DON'T see it, say “looking for traffic” — never claim traffic you don't have." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "option_clearance"
+    },
+    {
+      "id": "option_clearance",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, runway {rwy}, cleared for the option.",
+      "next": "option_readback"
+    },
+    {
+      "id": "option_readback",
+      "type": "studentCall",
+      "prompt": "Read back the option clearance.",
+      "hint": "Cleared for the option runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "clearance", "label": "option clearance readback", "extractor": "phrase", "expected": "cleared for the option", "required": true, "weight": 3, "feedbackMissing": "Read back the clearance: “cleared for the option”." },
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "Include the runway.", "feedbackWrong": "You read back runway {heard}, but you're cleared on runway {rwy}." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "touchandgo"
+    },
+    {
+      "id": "touchandgo",
+      "type": "event",
+      "text": "You follow the Cherokee, touch down, reconfigure, and lift off again. Back on the crosswind, then downwind for another lap.",
+      "next": "downwind2"
+    },
+    {
+      "id": "downwind2",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, make this one a full stop, runway {rwy}, cleared to land.",
+      "next": "fullstop_readback"
+    },
+    {
+      "id": "fullstop_readback",
+      "type": "studentCall",
+      "prompt": "Tower wants this one to be a full stop. Read it back.",
+      "hint": "Full stop, cleared to land runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "fullstop", "label": "full-stop acknowledgment", "extractor": "intent", "expected": "full stop", "required": true, "weight": 2, "feedbackMissing": "Acknowledge the change: “full stop”." },
+          { "id": "clearance", "label": "landing clearance readback", "extractor": "phrase", "expected": "cleared to land", "required": true, "weight": 3, "feedbackMissing": "Read back “cleared to land”." },
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "Include the runway.", "feedbackWrong": "You read back runway {heard}, but you're cleared on runway {rwy}." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "done"
+    },
+    {
+      "id": "done",
+      "type": "event",
+      "text": "Full-stop landing complete. Sequencing behind traffic, option clearances, a mid-pattern change of plan — that was real pattern work.",
+      "next": null
+    }
+  ]
+}

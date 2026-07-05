@@ -1,0 +1,121 @@
+{
+  "id": "classb-transition",
+  "level": 4,
+  "title": "Class Bravo transition: the magic words",
+  "briefing": {
+    "airport": "Metro Intl (KMTO) — Class B transition",
+    "description": "You want to fly straight through the Class Bravo instead of the long way around. One iron rule governs this flight: you may not enter Bravo airspace until you hear the literal words “CLEARED INTO/THROUGH THE CLASS BRAVO AIRSPACE”. Two-way contact isn't enough. “Radar contact” isn't enough. Sometimes the answer is “remain clear” — and you wait.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "frequencies": [{ "name": "Metro Approach", "mhz": "125.35" }]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "approaching",
+      "type": "event",
+      "text": "Level at 3,500, the Bravo shelf starts five miles ahead. Call BEFORE the boundary — with enough time to turn away if the answer is no.",
+      "next": "request_call"
+    },
+    {
+      "id": "request_call",
+      "type": "studentCall",
+      "prompt": "Call Metro Approach: who/where/altitude, and request the Bravo transition northbound.",
+      "hint": "Metro Approach, Skyhawk {callsign}, one five miles south of Metro at three thousand five hundred, request transition through the Class Bravo, northbound.",
+      "call": {
+        "elements": [
+          { "id": "facility", "label": "addressing Metro Approach", "extractor": "facility", "expected": "metro approach", "required": true, "weight": 2, "feedbackMissing": "Address the facility: “Metro Approach”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your full callsign." },
+          { "id": "position", "label": "your position", "extractor": "intent", "expected": "15 miles south of metro", "required": true, "weight": 2, "feedbackMissing": "Give your position: “one five miles south of Metro”." },
+          { "id": "altitude", "label": "your altitude", "extractor": "altitude", "expected": "three thousand five hundred", "required": true, "weight": 2, "feedbackMissing": "State your altitude — they need it to fit you under the arrivals.", "feedbackWrong": "You said {heard} feet, but you're level at 3,500." },
+          { "id": "request", "label": "the transition request", "extractor": "intent", "expected": "request transition through the class bravo", "required": true, "weight": 2, "feedbackMissing": "Make the request explicitly: “request transition through the Class Bravo”." }
+        ]
+      },
+      "next": "squawk_remain_clear"
+    },
+    {
+      "id": "squawk_remain_clear",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, Metro Approach, squawk {squawk} — and remain clear of the Class Bravo for now, I have arrivals crossing your route.",
+      "setsVariables": { "squawk": "{gen:squawk}" },
+      "next": "remain_clear_readback"
+    },
+    {
+      "id": "remain_clear_readback",
+      "type": "studentCall",
+      "prompt": "The answer for now is NO. Read back the squawk AND the remain-clear instruction — then actually stay out.",
+      "hint": "Squawk {squawk}, remaining clear of the Class Bravo, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "squawk", "label": "squawk readback", "extractor": "squawk", "expected": "{squawk}", "required": true, "weight": 2, "feedbackMissing": "Read back the squawk code.", "feedbackWrong": "You read back {heard}, but the assigned squawk is {squawk}." },
+          { "id": "remainclear", "label": "remain-clear readback", "extractor": "phrase", "expected": "remaining clear of the class bravo", "required": true, "weight": 3, "feedbackMissing": "Read back “remaining clear of the Class Bravo” — this is the instruction that keeps you legal. Entering now would be a violation." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "holding_outside"
+    },
+    {
+      "id": "holding_outside",
+      "type": "event",
+      "text": "You start a lazy 360 outside the shelf, transponder flashing your new code. Two airliners slide past above. Then:",
+      "next": "cleared_through"
+    },
+    {
+      "id": "cleared_through",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, radar contact. Cleared through the Class Bravo airspace, maintain three thousand five hundred, fly heading three six zero.",
+      "next": "bravo_readback"
+    },
+    {
+      "id": "bravo_readback",
+      "type": "studentCall",
+      "prompt": "There they are — the magic words. Read back the Bravo clearance, the altitude, and the heading.",
+      "hint": "Cleared through the Class Bravo, maintain three thousand five hundred, heading three six zero, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "bravo", "label": "the Bravo clearance readback", "extractor": "phrase", "expected": "cleared through the class bravo", "required": true, "weight": 3, "feedbackMissing": "Read back the clearance itself: “cleared through the Class Bravo”. This is the one phrase in VFR flying where the exact words legally matter." },
+          { "id": "altitude", "label": "altitude readback", "extractor": "altitude", "expected": "three thousand five hundred", "required": true, "weight": 2, "feedbackMissing": "Read back the assigned altitude — inside Bravo, altitude assignments are binding.", "feedbackWrong": "You read back {heard} feet, but the assignment is 3,500." },
+          { "id": "heading", "label": "heading readback", "extractor": "phrase", "expected": "heading three six zero", "required": true, "weight": 2, "feedbackMissing": "Read back the heading: “heading three six zero”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "inside"
+    },
+    {
+      "id": "inside",
+      "type": "event",
+      "text": "You cruise through the Bravo, the big airport sliding beneath your wings — heavies on the parallels, and you, a Skyhawk, right through the middle. Perfectly legal, because you heard the words.",
+      "next": "exiting"
+    },
+    {
+      "id": "exiting",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, you are leaving the Class Bravo airspace to the north. Radar services terminated, squawk VFR, frequency change approved. Good day.",
+      "next": "exit_ack"
+    },
+    {
+      "id": "exit_ack",
+      "type": "studentCall",
+      "prompt": "Acknowledge the termination.",
+      "hint": "Squawk VFR, frequency change approved, Skyhawk {callsign}. Good day.",
+      "call": {
+        "elements": [
+          { "id": "squawkvfr", "label": "squawk VFR acknowledgment", "extractor": "phrase", "expected": "squawk vfr", "required": true, "weight": 2, "feedbackMissing": "Acknowledge “squawk VFR” — confirm you'll reset to 1200." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "done"
+    },
+    {
+      "id": "done",
+      "type": "event",
+      "text": "Transition complete. Remember the rule that made it work: no entry without “cleared into/through the Class Bravo” — and when the answer is “remain clear”, you wait like a pro.",
+      "next": null
+    }
+  ]
+}

@@ -3,16 +3,26 @@ import ctafPattern from "./level1/ctaf-pattern.json";
 import ctafInbound from "./level1/ctaf-inbound.json";
 import classdTaxiTakeoff from "./level2/classd-taxi-takeoff.json";
 import classdArrival from "./level2/classd-arrival.json";
+import classdGoaround from "./level2/classd-goaround.json";
+import classdTouchandgo from "./level2/classd-touchandgo.json";
+import studentPilotToolkit from "./level2/student-pilot-toolkit.json";
 import flightFollowing from "./level3/flight-following.json";
+import inflightEmergency from "./level3/inflight-emergency.json";
 import classcDeparture from "./level4/classc-departure.json";
+import classbTransition from "./level4/classb-transition.json";
 
 export const scenarios: Scenario[] = [
   ctafPattern,
   ctafInbound,
   classdTaxiTakeoff,
   classdArrival,
+  classdTouchandgo,
+  classdGoaround,
+  studentPilotToolkit,
   flightFollowing,
+  inflightEmergency,
   classcDeparture,
+  classbTransition,
 ] as Scenario[];
 
 export const LEVEL_TITLES: Record<number, string> = {

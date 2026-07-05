@@ -1,0 +1,159 @@
+{
+  "id": "classd-goaround",
+  "level": 2,
+  "title": "Go around! Tower changes the plan",
+  "briefing": {
+    "airport": "Centerville Rgnl (KCVL) — Class D",
+    "description": "Inbound for landing — but this time the landing doesn't happen on the first try. A departing aircraft is slow to roll and Tower sends you around on short final. Go-arounds are normal, not emergencies: read back the instruction, fly the airplane, and get re-sequenced.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "atisText": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+    "frequencies": [
+      { "name": "ATIS", "mhz": "124.2" },
+      { "name": "Tower", "mhz": "118.3" }
+    ]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" },
+    { "name": "rwy", "kind": "choice", "choices": ["13", "31"] },
+    { "name": "atis", "kind": "choice", "choices": ["romeo", "sierra", "tango"] },
+    { "name": "wind_dir", "kind": "choice", "choices": ["120", "140", "300", "320"] },
+    { "name": "wind_kt", "kind": "choice", "choices": ["6", "9", "12"] },
+    { "name": "altimeter", "kind": "range", "range": { "min": 29.85, "max": 30.15, "step": 0.01, "decimals": 2 } },
+    { "name": "direction", "kind": "choice", "choices": ["north", "east", "south"] }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "atis",
+      "type": "atcSay",
+      "speaker": "ATIS",
+      "text": "Centerville Regional information {atis}. Wind {wind_dir} at {wind_kt}. Visibility one zero. Sky clear. Altimeter {altimeter}. Landing and departing runway {rwy}. Advise on initial contact you have information {atis}.",
+      "next": "inbound"
+    },
+    {
+      "id": "inbound",
+      "type": "event",
+      "text": "ATIS copied. You're 10 miles {direction}, inbound. You switch to Tower.",
+      "next": "initial_call"
+    },
+    {
+      "id": "initial_call",
+      "type": "studentCall",
+      "prompt": "Make your initial call to Tower with position, ATIS, and intentions (full stop).",
+      "hint": "Centerville Tower, Skyhawk {callsign}, one zero miles {direction} with information {atis}, inbound full stop.",
+      "call": {
+        "elements": [
+          { "id": "facility", "label": "addressing Centerville Tower", "extractor": "facility", "expected": "centerville tower", "required": true, "weight": 2, "feedbackMissing": "Address the facility: “Centerville Tower”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your full callsign on initial contact." },
+          { "id": "position", "label": "distance and direction", "extractor": "intent", "expected": "10 miles {direction}", "required": true, "weight": 2, "feedbackMissing": "Give your position: “one zero miles {direction}”." },
+          { "id": "atis", "label": "the ATIS code", "extractor": "atis", "expected": "{atis}", "required": true, "weight": 2, "feedbackMissing": "Report the ATIS: “with information {atis}”.", "feedbackWrong": "You said information {heard}, but the current ATIS is {atis}." },
+          { "id": "intent", "label": "your intentions", "extractor": "intent", "expected": "inbound full stop", "required": true, "weight": 2, "feedbackMissing": "State your intentions: “inbound full stop”." }
+        ]
+      },
+      "next": "tower_entry"
+    },
+    {
+      "id": "tower_entry",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, Centerville Tower, enter left base runway {rwy}, number one.",
+      "next": "entry_readback"
+    },
+    {
+      "id": "entry_readback",
+      "type": "studentCall",
+      "prompt": "Read back the pattern entry.",
+      "hint": "Enter left base runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "entry", "label": "pattern entry readback", "extractor": "phrase", "expected": "left base", "required": true, "weight": 2, "feedbackMissing": "Read back the entry: “enter left base runway {rwy}”." },
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "You forgot to read back the runway assignment.", "feedbackWrong": "You read back runway {heard}, but Tower assigned runway {rwy}." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End the readback with your callsign." }
+        ]
+      },
+      "next": "cleared_first"
+    },
+    {
+      "id": "cleared_first",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, runway {rwy}, cleared to land.",
+      "next": "landing_readback"
+    },
+    {
+      "id": "landing_readback",
+      "type": "studentCall",
+      "prompt": "Read back the landing clearance.",
+      "hint": "Cleared to land runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "clearance", "label": "landing clearance readback", "extractor": "phrase", "expected": "cleared to land", "required": true, "weight": 3, "feedbackMissing": "Read back the clearance: “cleared to land”." },
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "Read back the runway with your clearance.", "feedbackWrong": "You read back runway {heard}, but you're cleared for runway {rwy}." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End the readback with your callsign." }
+        ]
+      },
+      "next": "short_final"
+    },
+    {
+      "id": "short_final",
+      "type": "event",
+      "text": "Short final, looking good — but the Bonanza that departed ahead is still rolling on the runway. Tower keys up, voice urgent.",
+      "next": "goaround_cmd"
+    },
+    {
+      "id": "goaround_cmd",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, go around, traffic on the runway. Fly runway heading, climb to pattern altitude.",
+      "next": "goaround_readback"
+    },
+    {
+      "id": "goaround_readback",
+      "type": "studentCall",
+      "prompt": "Full power, pitch for climb — and read it back. Flying comes first, but Tower needs to hear you got it.",
+      "hint": "Going around, runway heading, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "goaround", "label": "go-around acknowledgment", "extractor": "phrase", "expected": "going around", "required": true, "weight": 3, "feedbackMissing": "Acknowledge the go-around: “going around”. Tower must know you received it — an aircraft continuing to land would be a runway conflict." },
+          { "id": "heading", "label": "runway heading acknowledgment", "extractor": "intent", "expected": "runway heading", "required": true, "weight": 2, "feedbackMissing": "Read back the instruction: “runway heading”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "climbing"
+    },
+    {
+      "id": "climbing",
+      "type": "event",
+      "text": "Clean go-around — you climb out over the runway as the Bonanza finally lifts off. Tower re-sequences you.",
+      "next": "resequence"
+    },
+    {
+      "id": "resequence",
+      "type": "atcSay",
+      "speaker": "Tower",
+      "text": "Skyhawk {callsign}, nicely done. Enter left downwind runway {rwy}, cleared to land, number one.",
+      "next": "second_readback"
+    },
+    {
+      "id": "second_readback",
+      "type": "studentCall",
+      "prompt": "Read back the new clearance.",
+      "hint": "Left downwind, cleared to land runway {rwy}, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "entry", "label": "downwind entry", "extractor": "phrase", "expected": "left downwind", "required": true, "weight": 2, "feedbackMissing": "Read back the pattern entry: “left downwind”." },
+          { "id": "clearance", "label": "landing clearance readback", "extractor": "phrase", "expected": "cleared to land", "required": true, "weight": 3, "feedbackMissing": "Read back “cleared to land” — the go-around cancelled your previous clearance, this is a new one." },
+          { "id": "runway", "label": "runway readback", "extractor": "runway", "expected": "{rwy}", "required": true, "weight": 2, "feedbackMissing": "Include the runway.", "feedbackWrong": "You read back runway {heard}, but you're cleared for runway {rwy}." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "landed"
+    },
+    {
+      "id": "landed",
+      "type": "event",
+      "text": "Second time's the charm — smooth touchdown on runway {rwy}. Go-arounds happen to everyone; handling one calmly is the mark of a real pilot.",
+      "next": null
+    }
+  ]
+}

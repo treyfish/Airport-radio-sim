@@ -1,0 +1,114 @@
+{
+  "id": "inflight-emergency",
+  "level": 3,
+  "title": "MAYDAY: rough engine over the pines",
+  "briefing": {
+    "airport": "En route near Cedar Valley — with Big Sky Approach",
+    "description": "You're cruising with flight following when the engine starts running rough and the oil pressure needle sags. Time to use the radio the way it was ultimately designed to be used. The distress call is MAYDAY three times, then who you are, what's wrong, where you are, and what you want. Expect ATC to ask for souls on board and fuel remaining — it's routine, answer calmly.",
+    "aircraft": "Cessna 172 (Skyhawk)",
+    "frequencies": [{ "name": "Big Sky Approach", "mhz": "126.4" }]
+  },
+  "variables": [
+    { "name": "callsign", "kind": "callsign" }
+  ],
+  "passingScore": 70,
+  "steps": [
+    {
+      "id": "trouble",
+      "type": "event",
+      "text": "Level at 4,500, 15 miles west of Centerville, the engine coughs. RPM drops, the airframe shudders, oil pressure is falling. Carb heat on, mixture rich — still rough. You're already talking to Big Sky Approach. Declare.",
+      "next": "mayday_call"
+    },
+    {
+      "id": "mayday_call",
+      "type": "studentCall",
+      "prompt": "Declare the emergency: MAYDAY three times, who you are, the problem, your position and altitude, and what you want (vectors to the nearest airport).",
+      "hint": "Mayday mayday mayday, Skyhawk {callsign}, rough running engine, one five miles west of Centerville at four thousand five hundred, request vectors to the nearest airport.",
+      "call": {
+        "elements": [
+          { "id": "mayday", "label": "MAYDAY three times", "extractor": "phrase", "expected": "mayday mayday mayday", "required": true, "weight": 3, "feedbackMissing": "Open with “MAYDAY, MAYDAY, MAYDAY” — three times is the standard, and it instantly clears the frequency for you." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Say who you are — rescuers can't help an anonymous airplane." },
+          { "id": "nature", "label": "nature of the emergency", "extractor": "intent", "expected": "rough running engine", "required": true, "weight": 2, "feedbackMissing": "Say what's wrong: “rough running engine”." },
+          { "id": "position", "label": "your position", "extractor": "intent", "expected": "15 miles west of centerville", "required": true, "weight": 2, "feedbackMissing": "Give your position — “one five miles west of Centerville”. It's the single most important piece if the engine quits entirely." },
+          { "id": "altitude", "label": "your altitude", "extractor": "altitude", "expected": "four thousand five hundred", "required": true, "weight": 1, "feedbackMissing": "Include your altitude — it tells ATC how much glide time you have.", "feedbackWrong": "You said {heard} feet, but you're at 4,500." },
+          { "id": "request", "label": "what you want", "extractor": "intent", "expected": "vectors to the nearest airport", "required": true, "weight": 2, "feedbackMissing": "Tell them what you need: “request vectors to the nearest airport”." }
+        ]
+      },
+      "next": "atc_response"
+    },
+    {
+      "id": "atc_response",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, roger mayday. Nearest airport is Cedar Valley, one zero miles south of your position. Turn right heading one niner zero. Say souls on board and fuel remaining.",
+      "next": "souls_call"
+    },
+    {
+      "id": "souls_call",
+      "type": "studentCall",
+      "prompt": "Read back the heading and answer: two people aboard, three hours of fuel.",
+      "hint": "Heading one niner zero, two souls on board, three hours fuel, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "heading", "label": "heading readback", "extractor": "phrase", "expected": "heading one niner zero", "required": true, "weight": 2, "feedbackMissing": "Read back the heading: “heading one niner zero” — it's your lifeline to the field." },
+          { "id": "souls", "label": "souls on board", "extractor": "intent", "expected": "two souls on board", "required": true, "weight": 2, "feedbackMissing": "Answer the question: “two souls on board”." },
+          { "id": "fuel", "label": "fuel remaining", "extractor": "intent", "expected": "three hours fuel", "required": true, "weight": 2, "feedbackMissing": "Answer the fuel question: “three hours fuel”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": false, "weight": 1, "feedbackMissing": "In an emergency, brevity wins — but a callsign still helps when you have the breath for it." }
+        ]
+      },
+      "next": "vectors"
+    },
+    {
+      "id": "vectors",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, Cedar Valley is twelve o'clock, eight miles. Equipment is standing by. Descend at your discretion — runway one eight is the favored runway, winds one seven zero at six.",
+      "next": "field_spotted"
+    },
+    {
+      "id": "field_spotted",
+      "type": "event",
+      "text": "The engine is still making partial power. There — the runway, dead ahead through the haze.",
+      "next": "field_call"
+    },
+    {
+      "id": "field_call",
+      "type": "studentCall",
+      "prompt": "Tell Approach you have the field in sight.",
+      "hint": "Field in sight, Skyhawk {callsign}.",
+      "call": {
+        "elements": [
+          { "id": "field", "label": "field in sight", "extractor": "intent", "expected": "field in sight", "required": true, "weight": 3, "feedbackMissing": "Report “field in sight” — it tells ATC you can complete the approach visually." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "Include your callsign." }
+        ]
+      },
+      "next": "release"
+    },
+    {
+      "id": "release",
+      "type": "atcSay",
+      "speaker": "Approach",
+      "text": "Skyhawk {callsign}, roger. Cleared to proceed direct Cedar Valley, change to advisory frequency approved. Good luck — we'll be watching until you're down.",
+      "next": "final_ack"
+    },
+    {
+      "id": "final_ack",
+      "type": "studentCall",
+      "prompt": "Acknowledge and switch — you'll self-announce at Cedar Valley from here.",
+      "hint": "Direct Cedar Valley, over to advisory, Skyhawk {callsign}. Thanks for the help.",
+      "call": {
+        "elements": [
+          { "id": "ack", "label": "acknowledgment", "extractor": "intent", "expected": "direct cedar valley", "required": true, "weight": 2, "feedbackMissing": "Acknowledge the instruction: “direct Cedar Valley”." },
+          { "id": "callsign", "label": "your callsign", "extractor": "callsign", "expected": "{callsign}", "required": true, "weight": 2, "feedbackMissing": "End with your callsign." }
+        ]
+      },
+      "next": "safe"
+    },
+    {
+      "id": "safe",
+      "type": "event",
+      "text": "You glide it in and roll out safely at Cedar Valley. Remember: declaring an emergency costs nothing — no paperwork for asking for help, and every resource in the system turns toward you the moment you say MAYDAY.",
+      "next": null
+    }
+  ]
+}
