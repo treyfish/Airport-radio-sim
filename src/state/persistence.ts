@@ -4,6 +4,8 @@ export interface Settings {
   callsign: string;
   ttsOn: boolean;
   fxOn: boolean;
+  /** background traffic on the frequency (other aircraft + distractor callsigns) */
+  chatterOn: boolean;
 }
 
 export interface ScenarioProgress {
@@ -22,7 +24,7 @@ const KEY = "airport-radio-sim:v1";
 
 const DEFAULTS: PersistedState = {
   version: 1,
-  settings: { callsign: "", ttsOn: true, fxOn: true },
+  settings: { callsign: "", ttsOn: true, fxOn: true, chatterOn: true },
   progress: {},
 };
 

@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ScenarioEngine, EngineEvent } from "../engine/scenarioEngine";
-import type { GradeResult } from "../grader/grader";
+import type { StudentCallStep } from "../types/scenario";
+import { defaultGrader, type GradeResult } from "../grader/grader";
+import { canonicalize } from "../grader/normalizer";
+import { extract } from "../grader/extractors";
+import { generateChatterCall, chatterIntervalMs, type ChatterCall } from "../engine/chatter";
+import { mulberry32 } from "../engine/variables";
 import type { Settings } from "../state/persistence";
 import { speak, stopSpeaking } from "../audio/tts";
 import { playSquelch, unlockAudio } from "../audio/radioFx";
@@ -9,14 +14,39 @@ import Transcript, { type TranscriptEntry } from "../components/Transcript";
 import PTTButton from "../components/PTTButton";
 import FrequencyDisplay from "../components/FrequencyDisplay";
 
+export interface TrapEvent {
+  stepId: string;
+  yourCall: string;
+  theirCallsign: string;
+}
+
 interface Props {
   engine: ScenarioEngine;
   settings: Settings;
-  onFinish(): void;
+  onFinish(traps: TrapEvent[]): void;
   onQuit(): void;
 }
 
 type PttState = "idle" | "keyed" | "review";
+
+/**
+ * Did this transmission engage with a distractor call's content or callsign?
+ * When the distractor's content overlaps what the student's own call should
+ * contain (`keyAmbiguous`), only an exact match on the WRONG callsign counts —
+ * otherwise a merely-imperfect attempt would be misread as a trap.
+ */
+function matchesDistractor(input: string, distractor: ChatterCall, keyAmbiguous: boolean): boolean {
+  const tokens = canonicalize(input);
+  if (distractor.distractorCallsign) {
+    const cs = canonicalize(distractor.distractorCallsign);
+    if (extract("callsign", tokens, cs).exact) return true;
+  }
+  if (distractor.distractorKey && !keyAmbiguous) {
+    const key = canonicalize(distractor.distractorKey);
+    if (extract("phrase", tokens, key).found) return true;
+  }
+  return false;
+}
 
 export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
   const [entries, setEntries] = useState<TranscriptEntry[]>([]);
@@ -37,6 +67,11 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
   const transmissionStartRef = useRef<number | null>(null);
   const pttStartAtRef = useRef<number | null>(null);
   const pttDurationMsRef = useRef<number | null>(null);
+  const currentStepRef = useRef<StudentCallStep | null>(null);
+  const lastDistractorRef = useRef<ChatterCall | null>(null);
+  const chatterRngRef = useRef(mulberry32((Date.now() ^ 0x5f3759df) >>> 1));
+  const chatterBusyRef = useRef(false);
+  const trapsRef = useRef<TrapEvent[]>([]);
   const hasVoice = recognitionAvailable();
 
   const append = useCallback((entry: TranscriptEntry) => {
@@ -68,6 +103,7 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
             setHintShown(false);
             setAwaitingCall(true);
             setBusy(false);
+            currentStepRef.current = event.step;
             cueShownAtRef.current = performance.now();
             transmissionStartRef.current = null;
             return;
@@ -75,7 +111,7 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
             setBusy(false);
             setAwaitingCall(false);
             append({ kind: "event", text: "— End of scenario. Heading to your debrief… —" });
-            setTimeout(onFinish, 1200);
+            setTimeout(() => onFinish(trapsRef.current), 1200);
             return;
         }
       }
@@ -96,10 +132,75 @@ export default function Radio({ engine, settings, onFinish, onQuit }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // --- background traffic ------------------------------------------------
+  // While the student is composing a call, other aircraft use the frequency.
+  // Some calls are distractors addressed to a similar callsign — answering
+  // one is the trap this feature exists to train against.
+  useEffect(() => {
+    if (!settings.chatterOn || !awaitingCall || busy) return;
+    const rng = chatterRngRef.current;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      if (cancelled || chatterBusyRef.current || pttState !== "idle") return;
+      chatterBusyRef.current = true;
+      const call = generateChatterCall(engine.scenario, engine.env, rng);
+      if (call.isDistractor) lastDistractorRef.current = call;
+      append({ kind: "other", speaker: call.speaker, text: call.text });
+      if (settings.ttsOn) {
+        setBusy(true); // PTT locked — you don't step on other traffic
+        await speak(call.text, { speaker: call.speaker, fx: settings.fxOn });
+        if (!cancelled) {
+          setBusy(false);
+          cueShownAtRef.current = performance.now(); // be fair on the delay clock
+        }
+      }
+      chatterBusyRef.current = false;
+    }, chatterIntervalMs(engine.scenario.level, rng));
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.chatterOn, settings.ttsOn, settings.fxOn, awaitingCall, busy, pttState, entries.length]);
+
   const submit = useCallback(
     (raw: string, viaVoice: boolean) => {
       const text = raw.trim();
       if (!text || !awaitingCall || busy) return;
+
+      // Trap check: did the student answer a call meant for a similar callsign?
+      const distractor = lastDistractorRef.current;
+      const step = currentStepRef.current;
+      if (distractor && step) {
+        const pre = defaultGrader.grade(text, step.call, engine.env, { voiceInput: viaVoice });
+        const keyAmbiguous = distractor.distractorKey
+          ? step.call.elements.some((el) =>
+              canonicalize(engine.render(el.expected))
+                .join(" ")
+                .includes(canonicalize(distractor.distractorKey!).join(" ")),
+            )
+          : true;
+        if (!pre.passed && matchesDistractor(text, distractor, keyAmbiguous)) {
+          lastDistractorRef.current = null;
+          append({ kind: "you", text });
+          setInput("");
+          setInterim("");
+          setPttState("idle");
+          const trap: TrapEvent = {
+            stepId: step.id,
+            yourCall: text,
+            theirCallsign: distractor.distractorCallsign ?? "another aircraft",
+          };
+          trapsRef.current = [...trapsRef.current, trap];
+          append({
+            kind: "coach",
+            text: `⚠ That call was for ${trap.theirCallsign} — not you. Listen for YOUR callsign before keying up. (Not counted as an attempt.)`,
+          });
+          cueShownAtRef.current = performance.now();
+          return;
+        }
+      }
+
       append({ kind: "you", text });
       setInput("");
       setInterim("");

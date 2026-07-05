@@ -14,7 +14,7 @@ const STATUS_ICON: Record<string, string> = {
 };
 
 export default function Debrief({ data, onRetry, onDone }: Props) {
-  const { scenario, results, totalScore, passed } = data;
+  const { scenario, results, totalScore, passed, traps } = data;
 
   return (
     <main className="debrief">
@@ -30,6 +30,26 @@ export default function Debrief({ data, onRetry, onDone }: Props) {
           <button className="link-btn" onClick={onDone}>back to scenarios</button>
         </div>
       </section>
+
+      {traps.length > 0 && (
+        <section className="call-card card discipline">
+          <h3>📻 Frequency discipline</h3>
+          <p>
+            You answered {traps.length === 1 ? "a call" : `${traps.length} calls`} meant for another
+            aircraft. On a real frequency this causes confusion at best — always match the callsign
+            before you key up.
+          </p>
+          <ul className="element-checklist">
+            {traps.map((t, i) => (
+              <li key={i} className="element wrong">
+                <span className="status-icon">✗</span>
+                <span className="element-label">That one was for {t.theirCallsign}</span>
+                <span className="element-feedback">You said: “{t.yourCall}”</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {results.map((r) => {
         const lastAttempt = r.attempts[r.attempts.length - 1];

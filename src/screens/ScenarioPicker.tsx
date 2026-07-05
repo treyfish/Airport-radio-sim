@@ -55,6 +55,14 @@ export default function ScenarioPicker({ persisted, onPick, onSettingsChange, on
             />
             Radio static effects
           </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={settings.chatterOn}
+              onChange={(e) => onSettingsChange({ ...settings, chatterOn: e.target.checked })}
+            />
+            Background traffic on frequency
+          </label>
         </div>
       </section>
 

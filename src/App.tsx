@@ -4,7 +4,7 @@ import { ScenarioEngine, type StepResult } from "./engine/scenarioEngine";
 import { loadState, saveSettings, recordResult, type Settings } from "./state/persistence";
 import ScenarioPicker from "./screens/ScenarioPicker";
 import Briefing from "./screens/Briefing";
-import Radio from "./screens/Radio";
+import Radio, { type TrapEvent } from "./screens/Radio";
 import Debrief from "./screens/Debrief";
 import Lesson from "./screens/Lesson";
 import Glossary from "./screens/Glossary";
@@ -19,6 +19,7 @@ export interface DebriefData {
   results: StepResult[];
   totalScore: number;
   passed: boolean;
+  traps: TrapEvent[];
 }
 
 export default function App() {
@@ -47,13 +48,13 @@ export default function App() {
     setScreen("radio");
   };
 
-  const finishScenario = () => {
+  const finishScenario = (traps: TrapEvent[]) => {
     const engine = engineRef.current;
     if (!engine || !scenario) return;
     const totalScore = engine.totalScore();
     const passed = engine.passed();
     setPersisted(recordResult(scenario.id, totalScore, passed));
-    setDebrief({ scenario, results: engine.results(), totalScore, passed });
+    setDebrief({ scenario, results: engine.results(), totalScore, passed, traps });
     setScreen("debrief");
   };
 

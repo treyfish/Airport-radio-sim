@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import type { GradeResult } from "../grader/grader";
 
 export interface TranscriptEntry {
-  kind: "atc" | "you" | "event" | "coach";
+  kind: "atc" | "you" | "event" | "coach" | "other";
   speaker?: string;
   text: string;
   grade?: GradeResult;
@@ -22,6 +22,13 @@ export default function Transcript({ entries }: { entries: TranscriptEntry[] }) 
           case "atc":
             return (
               <div key={i} className="bubble atc">
+                <span className="speaker">{entry.speaker}</span>
+                <p>{entry.text}</p>
+              </div>
+            );
+          case "other":
+            return (
+              <div key={i} className="bubble other">
                 <span className="speaker">{entry.speaker}</span>
                 <p>{entry.text}</p>
               </div>

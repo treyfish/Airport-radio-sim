@@ -160,6 +160,7 @@ input:focus { outline: 2px solid var(--accent-dim); }
 .bubble p { margin: 0; }
 .bubble .speaker { font-size: 0.7rem; letter-spacing: 0.5px; color: var(--text-dim); text-transform: uppercase; }
 .bubble.atc { background: var(--atc); align-self: flex-start; }
+.bubble.other { background: var(--bg-raised); border: 1px solid var(--border); align-self: flex-start; opacity: 0.75; font-size: 0.92rem; }
 .bubble.you { background: var(--you); align-self: flex-end; }
 .bubble.coach {
   background: transparent; border: 1px dashed var(--border);
